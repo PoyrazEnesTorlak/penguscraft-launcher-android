@@ -1,0 +1,54 @@
+{
+ "mControlDataList": [
+  {
+   "bgColor": 1510674198,
+   "cornerRadius": 100,
+   "displayInGame": true,
+   "isSwipeable": false,
+   "isToggle": false,
+   "opacity": 1,
+   "passThruEnabled": false,
+   "strokeColor": -1,
+   "strokeWidth": 0,
+   "name": "Klavye",
+   "keycodes": [
+    -1,
+    0,
+    0,
+    0
+   ],
+   "dynamicX": "${margin}",
+   "dynamicY": "${margin}",
+   "displayInMenu": true,
+   "width": 96,
+   "height": 36
+  },
+  {
+   "bgColor": 1510674198,
+   "cornerRadius": 100,
+   "displayInGame": true,
+   "isSwipeable": false,
+   "isToggle": false,
+   "opacity": 1,
+   "passThruEnabled": false,
+   "strokeColor": -1,
+   "strokeWidth": 0,
+   "name": "Sohbet",
+   "keycodes": [
+    84,
+    0,
+    0,
+    0
+   ],
+   "dynamicX": "${margin} * 2 + ${width}",
+   "dynamicY": "${margin}",
+   "displayInMenu": false,
+   "width": 96,
+   "height": 36
+  }
+ ],
+ "mDrawerDataList": [],
+ "mJoystickDataList": [],
+ "scaledAt": 100,
+ "version": 8
+}

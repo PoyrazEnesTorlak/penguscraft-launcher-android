@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pengu_hazirlik">Hazırlanıyor: %s</string>
+    <string name="pengu_hazirlik_hata">Oyun hazırlanamadı: %s</string>
+    <string name="pengu_oyna">OYNA</string>
+    <string name="pengu_sunucu_kontrol">Sunucu kontrol ediliyor…</string>
+    <string name="pengu_sunucu_acik">Çevrimiçi · %1$d/%2$d oyuncu</string>
+    <string name="pengu_sunucu_kapali">Sunucuya ulaşılamıyor</string>
+
+    <string name="pengu_arkadaslar">Arkadaşlar</string>
+    <string name="pengu_skin">Skin Değiştir</string>
+    <string name="pengu_sunucu_sifresi">Sunucu Şifresi</string>
+    <string name="pengu_site">Site</string>
+    <string name="pengu_performans">Performans (FPS)</string>
+
+    <string name="pengu_guncelleme_baslik">Yeni sürüm: %s</string>
+    <string name="pengu_guncelleme_mesaj">Pengu Launcher\'ın yeni sürümü hazır. Güncellemek için dokun.</string>
+    <string name="pengu_guncelle">Güncelle</string>
+    <string name="pengu_sonra">Sonra</string>
+    <string name="pengu_guncelleme_hata">Güncelleme indirilemedi: %s</string>
+    <string name="pengu_kurulum_izni">Güncellemeyi kurmak için bu uygulamaya \"bilinmeyen uygulamaları yükleme\" izni ver, sonra geri dön.</string>
+
+    <string name="pengu_skin_tip">Skin modeli</string>
+    <string name="pengu_skin_klasik">Klasik (kalın kol)</string>
+    <string name="pengu_skin_ince">İnce kol (Alex)</string>
+    <string name="pengu_skin_yukleniyor">Skin yükleniyor…</string>
+    <string name="pengu_skin_tamam">Skin yüklendi! Sunucuya girince uygulanacak.</string>
+    <string name="pengu_giris_gerekli">Önce giriş yapmalısın.</string>
+
+    <string name="pengu_fps_paketi">FPS Boost paketi</string>
+    <string name="pengu_fps_paketi_aciklama">FerriteCore, ModernFix, Lithium, ImmediatelyFast, EntityCulling ve Dynamic FPS</string>
+    <string name="pengu_sodium">Sodium (en yüksek FPS)</string>
+    <string name="pengu_sodium_aciklama">Oyun açılışta çöküyorsa veya görüntü bozuksa kapat</string>
+
+    <string name="pengu_sifre">Şifre</string>
+    <string name="pengu_sifre_tekrar">Şifre (tekrar)</string>
+    <string name="pengu_kayit_modu">Sunucuda yeni hesap aç (ilk kez giriyorum)</string>
+    <string name="pengu_sifre_kisa">Şifre en az 4 karakter olmalı.</string>
+    <string name="pengu_sifre_bosluk">Şifrede boşluk olamaz.</string>
+    <string name="pengu_sifre_ayni_degil">Şifreler aynı değil.</string>
+    <string name="pengu_sifre_yanlis">Şifre yanlış.</string>
+    <string name="pengu_sifre_kayitsiz">Bu kullanıcı adına ait bir hesap sunucuda bulunamadı. \"Yeni hesap aç\" seçeneğini işaretle.</string>
+    <string name="pengu_sifre_limit">Çok fazla deneme yapıldı, birkaç saniye bekleyip tekrar dene.</string>
+    <string name="pengu_sifre_kaydedildi">Sunucu şifresi kaydedildi. Oyuna girince otomatik giriş yapılacak.</string>
+    <string name="pengu_sifre_ipucu">Sunucudaki /login şifren. Boş bırakırsan her girişte oyunda yazman gerekir.</string>
+    <string name="pengu_kontrol_ediliyor">Kontrol ediliyor…</string>
+    <string name="pengu_kaydet">Kaydet</string>
+    <string name="pengu_sil">Sil</string>
+</resources>

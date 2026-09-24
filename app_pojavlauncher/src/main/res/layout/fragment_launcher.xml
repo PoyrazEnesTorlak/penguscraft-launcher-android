@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pengu: ana ekran tamamen web arayuzu (assets/pengu/ana.html), PC launcher ile ayni tasarim -->
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/fragment_menu_main"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#0B0F16">
+	<WebView
+		android:id="@+id/pengu_web"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent" />
+</FrameLayout>

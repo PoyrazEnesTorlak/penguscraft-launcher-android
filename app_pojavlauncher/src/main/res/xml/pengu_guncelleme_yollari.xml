@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PenguGuncelleme'nin indirdigi APK'yi kurulum ekranina vermek icin -->
+<paths>
+    <cache-path name="guncelleme" path="guncelleme/" />
+</paths>

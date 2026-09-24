@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Arkadaşlar</title>
+<style>
+  :root {
+    /* PC launcher paleti */
+    --bg: #0b0f16; --panel: #111722; --panel2: #18202e; --line: #232d3d;
+    --text: #e8eef7; --muted: #8ea0b8; --accent: #4fa8e8; --ok: #5cc23f; --bad: #ef4444;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 15px/1.4 'Segoe UI', Roboto, system-ui, sans-serif; }
+  body { display: flex; flex-direction: column; }
+  header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--panel);
+    border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 17px; margin: 0; flex: 1; }
+  .ben { color: var(--muted); font-size: 13px; }
+  button { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 9px 14px; cursor: pointer; }
+  button.ana { background: linear-gradient(180deg,#4fa8e8,#2f7fd0); border-color: #2f7fd0; color: #fff; font-weight: 600; }
+  button.kirmizi { background: var(--bad); border-color: var(--bad); color: #fff; }
+  button.yesil { background: var(--ok); border-color: var(--ok); color: #fff; }
+  button:disabled { opacity: .5; }
+  input { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px; width: 100%; outline: none; }
+  input:focus { border-color: var(--accent); }
+  nav { display: flex; background: var(--panel); border-bottom: 1px solid var(--line); }
+  nav button { flex: 1; border: 0; border-radius: 0; background: none; padding: 12px 4px; color: var(--muted);
+    border-bottom: 2px solid transparent; }
+  nav button.secili { color: var(--text); border-image: linear-gradient(90deg,#4fa8e8,#5cc23f) 1; }
+  .rozet { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 9px; background: var(--bad);
+    color: #fff; font-size: 11px; line-height: 18px; margin-left: 4px; }
+  main { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .gizli { display: none !important; }
+  .satir { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 12px; margin-bottom: 8px; }
+  .satir img { width: 36px; height: 36px; border-radius: 8px; image-rendering: pixelated; background: var(--panel2); }
+  .satir .ad { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nokta { width: 9px; height: 9px; border-radius: 50%; background: #55607a; display: inline-block; margin-right: 6px; }
+  .nokta.acik { background: var(--ok); }
+  .bos { color: var(--muted); text-align: center; padding: 32px 8px; }
+  .durum { font-size: 13px; margin: 8px 0; min-height: 18px; }
+  .durum.hata { color: var(--bad); }
+  h2 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 16px 0 8px; }
+
+  /* sohbet */
+  #sohbet { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; z-index: 5; }
+  #sohbet header button { padding: 7px 10px; }
+  #mesajlar { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .mesaj { max-width: 80%; padding: 8px 12px; border-radius: 14px; background: var(--panel2); word-wrap: break-word;
+    white-space: pre-wrap; }
+  .mesaj.benim { align-self: flex-end; background: var(--accent); color: #fff; }
+  .mesaj small { display: block; opacity: .6; font-size: 11px; margin-top: 2px; }
+  #yazma { display: flex; gap: 8px; padding: 10px 12px; background: var(--panel); border-top: 1px solid var(--line); }
+  #menu { position: absolute; right: 12px; top: 56px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; z-index: 6; }
+  #menu button { display: block; width: 100%; text-align: left; border: 0; border-radius: 0; background: none; padding: 12px 18px; }
+
+  /* arama */
+  #cagri { position: fixed; left: 12px; right: 12px; bottom: 12px; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 14px; display: flex; align-items: center; gap: 10px; z-index: 10;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5); }
+  #cagri .bilgi { flex: 1; }
+  #cagri .bilgi b { display: block; }
+  #cagri .bilgi span { color: var(--muted); font-size: 13px; }
+  #pencere { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center;
+    justify-content: center; z-index: 20; padding: 16px; }
+  #pencere .kutu { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 18px; width: 100%; max-width: 420px; }
+  #pencere .dugmeler { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Arkadaşlar</h1>
+  <span class="ben" id="ben"></span>
+</header>
+<nav>
+  <button data-sekme="liste" class="secili">Arkadaşlar</button>
+  <button data-sekme="istekler">İstekler<span id="istekSayi" class="rozet gizli"></span></button>
+  <button data-sekme="ekle">Ekle</button>
+</nav>
+<main>
+  <div class="durum" id="durum"></div>
+  <section id="s-liste"><div id="liste"></div></section>
+  <section id="s-istekler" class="gizli">
+    <h2>Gelen</h2><div id="gelen"></div>
+    <h2>Gönderilen</h2><div id="giden"></div>
+    <h2>Engellenenler</h2><div id="engelli"></div>
+  </section>
+  <section id="s-ekle" class="gizli">
+    <input id="ara" placeholder="Oyuncu adı yaz..." autocomplete="off" autocapitalize="off" spellcheck="false">
+    <div style="margin-top:10px" id="sonuclar"></div>
+  </section>
+</main>
+
+<div id="sohbet" class="gizli">
+  <header>
+    <button id="geri">←</button>
+    <h1 id="sohbetAd"></h1>
+    <button id="araBtn">📞</button>
+    <button id="menuBtn">⋮</button>
+  </header>
+  <div id="menu" class="gizli">
+    <button id="mSil">Arkadaşlıktan çıkar</button>
+    <button id="mEngelle">Engelle</button>
+    <button id="mSikayet">Şikayet et</button>
+  </div>
+  <div id="mesajlar"></div>
+  <form id="yazma">
+    <input id="mesaj" placeholder="Mesaj yaz..." autocomplete="off" maxlength="2000">
+    <button class="ana" type="submit">Gönder</button>
+  </form>
+</div>
+
+<div id="cagri" class="gizli">
+  <div class="bilgi"><b id="cagriAd"></b><span id="cagriDurum"></span></div>
+  <button id="cKabul" class="yesil gizli">Kabul</button>
+  <button id="cSessiz" class="gizli">Sessiz</button>
+  <button id="cKapat" class="kirmizi">Kapat</button>
+</div>
+<audio id="uzakSes" autoplay></audio>
+<audio id="zil" src="ringtone.mp3" loop></audio>
+
+<div id="pencere" class="gizli"><div class="kutu">
+  <div id="pMetin"></div>
+  <input id="pGiris" class="gizli" style="margin-top:10px" maxlength="1000">
+  <div class="dugmeler"><button id="pIptal">Vazgeç</button><button id="pTamam" class="ana">Tamam</button></div>
+</div></div>
+
+<script src="socket.io.min.js"></script>
+<script>
+(() => {
+  const SUNUCU = 'https://arkadaslar.penguscraft.com.tr';
+  const ICE = [{ urls: 'stun:stun.l.google.com:19302' }];
+  const ZIL_SURESI = 45000;
+  const $ = (id) => document.getElementById(id);
+  const q = new URLSearchParams(location.search);
+  const BEN = q.get('u') || '';
+  const SIR = q.get('s') || '';
+
+  let token = null, soket = null;
+  let arkadaslar = [], gelen = [], giden = [], engelli = [];
+  let aktif = null;               // acik sohbet
+  const mesajOnbellek = new Map();
+  let cagri = null;
+
+  $('ben').textContent = BEN;
+
+  function durum(metin, hata) {
+    $('durum').textContent = metin || '';
+    $('durum').classList.toggle('hata', !!hata);
+  }
+
+  async function api(yol, secenek = {}) {
+    const res = await fetch(SUNUCU + yol, {
+      method: secenek.method || 'GET',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: secenek.body ? JSON.stringify(secenek.body) : undefined
+    });
+    const veri = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(veri.hata || ('Hata ' + res.status));
+    return veri;
+  }
+
+  const kafa = (ad) => 'https://mc-heads.net/avatar/' + encodeURIComponent(ad) + '/36';
+
+  function satir(ad, cevrimici, dugmeler, tikla) {
+    const d = document.createElement('div');
+    d.className = 'satir';
+    const img = document.createElement('img'); img.src = kafa(ad); img.alt = '';
+    const a = document.createElement('div'); a.className = 'ad';
+    if (cevrimici !== null) {
+      const n = document.createElement('span'); n.className = 'nokta' + (cevrimici ? ' acik' : '');
+      a.appendChild(n);
+    }
+    a.appendChild(document.createTextNode(ad));
+    d.append(img, a);
+    for (const [metin, sinif, is] of dugmeler) {
+      const b = document.createElement('button'); b.textContent = metin; if (sinif) b.className = sinif;
+      b.onclick = (e) => { e.stopPropagation(); is(); };
+      d.appendChild(b);
+    }
+    if (tikla) d.onclick = tikla;
+    return d;
+  }
+
+  function bosMu(kutu, metin) {
+    if (kutu.children.length) return;
+    const b = document.createElement('div'); b.className = 'bos'; b.textContent = metin; kutu.appendChild(b);
+  }
+
+  /* ------------------------------------------------------------ listeler */
+  function listeCiz() {
+    const k = $('liste'); k.innerHTML = '';
+    const sirali = [...arkadaslar].sort((a, b) => (b.online - a.online) || a.username.localeCompare(b.username));
+    for (const f of sirali) k.appendChild(satir(f.username, f.online, [], () => sohbetAc(f.username)));
+    bosMu(k, 'Henüz arkadaşın yok. "Ekle" sekmesinden oyuncu arayabilirsin.');
+  }
+
+  function isteklerCiz() {
+    const g = $('gelen'); g.innerHTML = '';
+    for (const r of gelen) g.appendChild(satir(r.from, null, [
+      ['Kabul', 'yesil', () => istekCevap(r.from, true)],
+      ['Reddet', '', () => istekCevap(r.from, false)]
+    ]));
+    bosMu(g, 'Gelen istek yok.');
+    const o = $('giden'); o.innerHTML = '';
+    for (const r of giden) o.appendChild(satir(r.to, null, []));
+    bosMu(o, 'Gönderilen istek yok.');
+    const e = $('engelli'); e.innerHTML = '';
+    for (const u of engelli) e.appendChild(satir(u, null, [['Engeli kaldır', '', () => engelKaldir(u)]]));
+    bosMu(e, 'Engellenen yok.');
+    const s = $('istekSayi');
+    s.textContent = gelen.length; s.classList.toggle('gizli', !gelen.length);
+  }
+
+  async function arkadasYenile() {
+    try { ({ friends: arkadaslar } = await api('/friends')); listeCiz(); } catch (e) { durum(e.message, true); }
+  }
+  async function istekYenile() {
+    try {
+      ({ incoming: gelen, outgoing: giden } = await api('/friends/requests'));
+      ({ blocked: engelli } = await api('/blocked'));
+      isteklerCiz();
+    } catch (e) { durum(e.message, true); }
+  }
+
+  async function istekCevap(ad, kabul) {
+    try {
+      await api(kabul ? '/friends/accept' : '/friends/decline', { method: 'POST', body: { fromUsername: ad } });
+      istekYenile(); if (kabul) arkadasYenile();
+    } catch (e) { durum(e.message, true); }
+  }
+  async function engelKaldir(ad) {
+    try { await api('/unblock', { method: 'POST', body: { username: ad } }); istekYenile(); }
+    catch (e) { durum(e.message, true); }
+  }
+
+  /* ------------------------------------------------------------ ekle */
+  let araZaman = null;
+  $('ara').addEventListener('input', () => {
+    clearTimeout(araZaman);
+    const metin = $('ara').value.trim();
+    const k = $('sonuclar');
+    if (!/^[A-Za-z0-9_]{2,16}$/.test(metin)) { k.innerHTML = ''; return; }
+    araZaman = setTimeout(async () => {
+      let users = [];
+      try { ({ users } = await api('/users/search?q=' + encodeURIComponent(metin))); } catch { return; }
+      k.innerHTML = '';
+      for (const u of users) k.appendChild(satir(u, null, [['İstek gönder', 'ana', () => istekGonder(u)]]));
+      bosMu(k, 'Oyuncu bulunamadı.');
+    }, 250);
+  });
+
+  async function istekGonder(ad) {
+    try {
+      const r = await api('/friends/request', { method: 'POST', body: { toUsername: ad } });
+      durum(r.status === 'accepted' ? ad + ' artık arkadaşın!' : ad + ' kullanıcısına istek gönderildi.');
+      istekYenile(); arkadasYenile();
+    } catch (e) { durum(e.message, true); }
+  }
+
+  /* ------------------------------------------------------------ sekmeler */
+  document.querySelectorAll('nav button').forEach((b) => b.onclick = () => {
+    document.querySelectorAll('nav button').forEach((x) => x.classList.toggle('secili', x === b));
+    for (const s of ['liste', 'istekler', 'ekle']) $('s-' + s).classList.toggle('gizli', s !== b.dataset.sekme);
+    durum('');
+    if (b.dataset.sekme === 'istekler') istekYenile();
+    if (b.dataset.sekme === 'ekle') setTimeout(() => $('ara').focus(), 50);
+  });
+
+  /* ------------------------------------------------------------ sohbet */
+  function saat(t) { const d = new Date(t); return d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }
+
+  function mesajlariCiz() {
+    const k = $('mesajlar'); k.innerHTML = '';
+    for (const m of mesajOnbellek.get(aktif) || []) {
+      const d = document.createElement('div');
+      d.className = 'mesaj' + (m.from === BEN ? ' benim' : '');
+      d.textContent = m.body;
+      const s = document.createElement('small'); s.textContent = saat(m.createdAt); d.appendChild(s);
+      k.appendChild(d);
+    }
+    k.scrollTop = k.scrollHeight;
+  }
+
+  async function sohbetAc(ad) {
+    aktif = ad;
+    $('sohbetAd').textContent = ad;
+    $('sohbet').classList.remove('gizli');
+    $('menu').classList.add('gizli');
+    cagriDugmesi();
+    mesajlariCiz();
+    try {
+      const { messages } = await api('/messages/' + encodeURIComponent(ad));
+      mesajOnbellek.set(ad, messages);
+      if (aktif === ad) mesajlariCiz();
+    } catch (e) { durum(e.message, true); }
+  }
+  function sohbetKapat() { aktif = null; $('sohbet').classList.add('gizli'); $('menu').classList.add('gizli'); }
+  $('geri').onclick = sohbetKapat;
+
+  $('yazma').onsubmit = (e) => {
+    e.preventDefault();
+    const metin = $('mesaj').value.trim();
+    if (!metin || !aktif || !soket) return;
+    soket.emit('chat:send', { to: aktif, body: metin });
+    $('mesaj').value = '';
+  };
+
+  function mesajGeldi(m) {
+    const karsi = m.from === BEN ? m.to : m.from;
+    const liste = mesajOnbellek.get(karsi) || [];
+    liste.push(m); mesajOnbellek.set(karsi, liste);
+    if (aktif === karsi) mesajlariCiz();
+    else if (m.from !== BEN) durum(m.from + ': ' + m.body.slice(0, 60));
+  }
+
+  $('menuBtn').onclick = () => $('menu').classList.toggle('gizli');
+  $('mSil').onclick = async () => {
+    const ad = aktif; $('menu').classList.add('gizli');
+    if (!await sor(ad + ' arkadaşlıktan çıkarılsın mı?')) return;
+    try { await api('/friends/' + encodeURIComponent(ad), { method: 'DELETE' }); sohbetKapat(); arkadasYenile(); }
+    catch (e) { durum(e.message, true); }
+  };
+  $('mEngelle').onclick = async () => {
+    const ad = aktif; $('menu').classList.add('gizli');
+    if (!await sor(ad + ' engellensin mi? Birbirinize mesaj atamaz ve arayamazsınız.')) return;
+    try { await api('/block', { method: 'POST', body: { username: ad } }); sohbetKapat(); arkadasYenile(); istekYenile(); }
+    catch (e) { durum(e.message, true); }
+  };
+  $('mSikayet').onclick = async () => {
+    const ad = aktif; $('menu').classList.add('gizli');
+    const sebep = await sor(ad + ' neden şikayet ediliyor?', true);
+    if (!sebep) return;
+    try { await api('/report', { method: 'POST', body: { aboutUsername: ad, reason: sebep } }); durum('Şikayetin iletildi.'); }
+    catch (e) { durum(e.message, true); }
+  };
+
+  function sor(metin, girisli) {
+    return new Promise((coz) => {
+      $('pMetin').textContent = metin;
+      $('pGiris').value = '';
+      $('pGiris').classList.toggle('gizli', !girisli);
+      $('pencere').classList.remove('gizli');
+      const bitir = (deger) => { $('pencere').classList.add('gizli'); coz(deger); };
+      $('pIptal').onclick = () => bitir(girisli ? '' : false);
+      $('pTamam').onclick = () => bitir(girisli ? $('pGiris').value.trim() : true);
+      if (girisli) setTimeout(() => $('pGiris').focus(), 50);
+    });
+  }
+
+  /* ------------------------------------------------------------ sesli arama (WebRTC) */
+  function zil(ac) {
+    const z = $('zil');
+    if (ac) { z.currentTime = 0; z.play().catch(() => {}); } else z.pause();
+    if (ac && window.Pengu) Pengu.titret();
+  }
+
+  function cagriGoster(ad, metin, gelenMi) {
+    $('cagri').classList.remove('gizli');
+    $('cagriAd').textContent = ad;
+    $('cagriDurum').textContent = metin;
+    $('cKabul').classList.toggle('gizli', !gelenMi);
+    $('cSessiz').classList.toggle('gizli', gelenMi);
+  }
+  function cagriGizle() { $('cagri').classList.add('gizli'); }
+
+  function cagriDugmesi() {
+    const f = arkadaslar.find((x) => x.username === aktif);
+    $('araBtn').disabled = !!cagri || !f || !f.online;
+  }
+
+  function yeniBaglanti(karsi) {
+    const pc = new RTCPeerConnection({ iceServers: ICE });
+    pc.onicecandidate = (e) => { if (e.candidate) soket.emit('call:ice', { to: karsi, candidate: e.candidate }); };
+    pc.ontrack = (e) => { $('uzakSes').srcObject = e.streams[0]; };
+    pc.onconnectionstatechange = () => {
+      if (!cagri) return;
+      if (pc.connectionState === 'connected') {
+        zamanTemizle(); cagri.durum = 'gorusme'; cagriGoster(cagri.karsi, 'Görüşmede', false);
+      }
+      if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) cagriBitir(true);
+    };
+    return pc;
+  }
+
+  function zamanTemizle() { if (cagri && cagri.zaman) { clearTimeout(cagri.zaman); cagri.zaman = null; } }
+
+  async function mikrofon() {
+    try { return await navigator.mediaDevices.getUserMedia({ audio: true }); }
+    catch { durum('Mikrofona erişilemedi. Uygulama ayarlarından mikrofon iznini aç.', true); return null; }
+  }
+
+  async function aramaBaslat(karsi) {
+    if (cagri || !soket) return;
+    const akis = await mikrofon();
+    if (!akis) return;
+    if (cagri) { akis.getTracks().forEach((t) => t.stop()); return; }
+    const pc = yeniBaglanti(karsi);
+    akis.getTracks().forEach((t) => pc.addTrack(t, akis));
+    cagri = { karsi, pc, akis, durum: 'araniyor', iceKuyruk: [], zaman: null };
+    cagriGoster(karsi, 'Aranıyor...', false);
+    cagriDugmesi();
+    cagri.zaman = setTimeout(() => {
+      if (cagri && cagri.durum === 'araniyor') { durum('Karşı taraf cevap vermedi.', true); cagriBitir(true); }
+    }, ZIL_SURESI);
+    const teklif = await pc.createOffer();
+    await pc.setLocalDescription(teklif);
+    soket.emit('call:offer', { to: karsi, sdp: pc.localDescription });
+  }
+  $('araBtn').onclick = () => aktif && aramaBaslat(aktif);
+
+  function teklifGeldi({ from, sdp } = {}) {
+    if (!from || !sdp) return;
+    if (cagri) { soket.emit('call:end', { to: from }); return; } // ayni anda tek gorusme
+    cagri = { karsi: from, pc: null, akis: null, durum: 'caliyor', iceKuyruk: [], teklif: sdp, zaman: null };
+    cagriGoster(from, 'Sesli arıyor...', true);
+    zil(true);
+    cagri.zaman = setTimeout(() => { if (cagri && cagri.durum === 'caliyor') reddet(); }, ZIL_SURESI);
+    cagriDugmesi();
+  }
+
+  async function kabulEt() {
+    if (!cagri || cagri.pc) return;
+    zil(false);
+    const akis = await mikrofon();
+    if (!akis) { cagriBitir(true); return; }
+    if (!cagri) { akis.getTracks().forEach((t) => t.stop()); return; }
+    zamanTemizle();
+    const pc = yeniBaglanti(cagri.karsi);
+    akis.getTracks().forEach((t) => pc.addTrack(t, akis));
+    cagri.pc = pc; cagri.akis = akis; cagri.durum = 'gorusme';
+    cagriGoster(cagri.karsi, 'Bağlanıyor...', false);
+    await pc.setRemoteDescription(cagri.teklif);
+    for (const c of cagri.iceKuyruk) await pc.addIceCandidate(c);
+    cagri.iceKuyruk = [];
+    const cevap = await pc.createAnswer();
+    await pc.setLocalDescription(cevap);
+    soket.emit('call:answer', { to: cagri.karsi, sdp: pc.localDescription });
+  }
+
+  function reddet() {
+    if (!cagri) return;
+    soket && soket.emit('call:end', { to: cagri.karsi });
+    zamanTemizle(); cagri = null; zil(false); cagriGizle(); cagriDugmesi();
+  }
+
+  async function cevapGeldi({ from, sdp } = {}) {
+    if (!cagri || cagri.karsi !== from || !cagri.pc) return;
+    await cagri.pc.setRemoteDescription(sdp);
+    for (const c of cagri.iceKuyruk) await cagri.pc.addIceCandidate(c);
+    cagri.iceKuyruk = [];
+  }
+
+  async function iceGeldi({ from, candidate } = {}) {
+    if (!cagri || cagri.karsi !== from || !candidate) return;
+    if (!cagri.pc || !cagri.pc.remoteDescription || !cagri.pc.remoteDescription.type) { cagri.iceKuyruk.push(candidate); return; }
+    try { await cagri.pc.addIceCandidate(candidate); } catch { /* gec kalmis aday */ }
+  }
+
+  function cagriBitir(bildir) {
+    if (!cagri) return;
+    if (bildir && soket) soket.emit('call:end', { to: cagri.karsi });
+    if (cagri.pc) cagri.pc.close();
+    if (cagri.akis) cagri.akis.getTracks().forEach((t) => t.stop());
+    zamanTemizle(); cagri = null; zil(false); cagriGizle(); cagriDugmesi();
+  }
+
+  $('cKabul').onclick = kabulEt;
+  $('cKapat').onclick = () => (cagri && cagri.durum === 'caliyor' ? reddet() : cagriBitir(true));
+  $('cSessiz').onclick = () => {
+    if (!cagri || !cagri.akis) return;
+    const iz = cagri.akis.getAudioTracks()[0];
+    iz.enabled = !iz.enabled;
+    $('cSessiz').textContent = iz.enabled ? 'Sessiz' : 'Sesi aç';
+  };
+
+  /* ------------------------------------------------------------ baglanti */
+  async function basla() {
+    if (!BEN || !SIR) { durum('Arkadaşlar için önce giriş yapmalısın.', true); return; }
+    durum('Bağlanıyor...');
+    try {
+      const res = await fetch(SUNUCU + '/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: BEN, secret: SIR })
+      });
+      const veri = await res.json().catch(() => ({}));
+      if (!res.ok) { durum('Arkadaşlar: ' + (veri.hata || 'giriş başarısız'), true); return; }
+      token = veri.token;
+    } catch {
+      durum('Arkadaşlar sunucusuna ulaşılamıyor.', true);
+      return;
+    }
+
+    soket = io(SUNUCU, { auth: { token }, transports: ['websocket', 'polling'] });
+    soket.on('connect', () => { durum(''); arkadasYenile(); istekYenile(); });
+    soket.on('connect_error', () => durum('Bağlantı kurulamadı, tekrar deneniyor...', true));
+    soket.on('presence', ({ username: u, online }) => {
+      const f = arkadaslar.find((x) => x.username === u);
+      if (f) { f.online = online; listeCiz(); cagriDugmesi(); }
+    });
+    soket.on('friend:request', istekYenile);
+    soket.on('friend:accepted', () => { arkadasYenile(); istekYenile(); });
+    soket.on('friend:declined', istekYenile);
+    const cikar = ({ username: u } = {}) => {
+      arkadaslar = arkadaslar.filter((x) => x.username !== u); listeCiz();
+      if (aktif === u) sohbetKapat();
+    };
+    soket.on('friend:removed', cikar);
+    soket.on('blocked:by', cikar);
+    soket.on('chat:message', mesajGeldi);
+    soket.on('chat:ack', mesajGeldi);
+    soket.on('call:offer', teklifGeldi);
+    soket.on('call:answer', cevapGeldi);
+    soket.on('call:ice', iceGeldi);
+    soket.on('call:end', ({ from } = {}) => { if (cagri && cagri.karsi === from) cagriBitir(false); });
+  }
+
+  // Android geri tusu: once acik pencereleri kapat
+  window.geriTusu = () => {
+    if (!$('pencere').classList.contains('gizli')) { $('pIptal').click(); return true; }
+    if (!$('menu').classList.contains('gizli')) { $('menu').classList.add('gizli'); return true; }
+    if (aktif) { sohbetKapat(); return true; }
+    return false;
+  };
+
+  basla();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Pengu Launcher</title>
+<style>
+  /* PC launcher (launcher.js) ile ayni renkler */
+  :root {
+    --bg:#0b0f16; --bg-2:#111722; --bg-3:#18202e; --line:#232d3d;
+    --txt:#e8eef7; --dim:#8ea0b8;
+    --blue:#4fa8e8; --blue-2:#2f7fd0;
+    --green:#5cc23f; --green-2:#49a52f;
+    --danger:#ef4444;
+    --glass: rgba(17,23,34,.72);
+    --nav-h: 64px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; }
+  body { font-family:'Segoe UI', Roboto, system-ui, sans-serif; background:var(--bg); color:var(--txt);
+    overflow:hidden; user-select:none; -webkit-user-select:none; }
+  .mono { font-family: 'JetBrains Mono', Consolas, 'Roboto Mono', monospace; }
+  .gizli { display:none !important; }
+
+  /* ---- animasyonlu arka plan ---- */
+  .aurora { position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
+  .blob { position:absolute; border-radius:50%; filter:blur(70px); opacity:.30; }
+  .b1 { width:380px; height:380px; background:#2f7fd0; top:-140px; left:-120px; animation:d1 26s ease-in-out infinite; }
+  .b2 { width:340px; height:340px; background:#5cc23f; bottom:-150px; right:-110px; animation:d2 32s ease-in-out infinite; }
+  .b3 { width:260px; height:260px; background:#4fa8e8; top:40%; right:10%; opacity:.16; animation:d3 38s ease-in-out infinite; }
+  @keyframes d1 { 50% { transform:translate(70px,50px) scale(1.12); } }
+  @keyframes d2 { 50% { transform:translate(-60px,-40px) scale(1.08); } }
+  @keyframes d3 { 50% { transform:translate(-50px,60px); } }
+
+  .ekran { position:relative; z-index:2; height:100%; }
+
+  /* ---- ortak ---- */
+  .kart { background:var(--glass); border:1px solid rgba(255,255,255,.08); border-radius:18px;
+    box-shadow:0 20px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+  .btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; border:0; border-radius:12px;
+    padding:14px 16px; font:inherit; font-weight:700; font-size:15px; color:#fff; cursor:pointer;
+    background:linear-gradient(180deg,var(--blue),var(--blue-2)); box-shadow:0 8px 22px rgba(47,127,208,.35);
+    transition:transform .12s, filter .15s; }
+  .btn:active { transform:scale(.98); }
+  .btn:disabled { filter:grayscale(.6) brightness(.7); }
+  .btn.yesil { background:linear-gradient(180deg,var(--green),var(--green-2)); box-shadow:0 8px 22px rgba(92,194,63,.35); }
+  .btn.koyu { background:var(--bg-3); border:1px solid var(--line); box-shadow:none; font-weight:600; }
+  .btn.kirmizi { background:transparent; border:1px solid rgba(239,68,68,.5); color:#ff8a8a; box-shadow:none; font-weight:600; }
+  .btn.kucuk { width:auto; padding:9px 14px; font-size:13px; border-radius:10px; }
+  .alan { margin-bottom:14px; text-align:left; }
+  .alan label { display:block; font-size:11px; color:var(--dim); margin-bottom:6px; letter-spacing:.4px; text-transform:uppercase; }
+  .alan label .ops { text-transform:none; letter-spacing:0; color:#5d6b80; }
+  input[type=text], input[type=password], input[type=search] {
+    width:100%; background:rgba(11,15,22,.7); border:1px solid var(--line); border-radius:11px; color:var(--txt);
+    font:inherit; font-size:15px; padding:12px 14px; outline:none; transition:border-color .15s, box-shadow .15s; }
+  input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(79,168,232,.18); }
+  .hata { color:#ff8a8a; font-size:13px; min-height:18px; margin:4px 0 10px; }
+  .sessiz { color:var(--dim); font-size:13px; }
+
+  /* anahtar (toggle) */
+  .satir { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .satir:last-child { border-bottom:0; }
+  .satir .bilgi { flex:1; min-width:0; }
+  .satir .bilgi b { display:block; font-size:15px; font-weight:600; }
+  .satir .bilgi span { display:block; color:var(--dim); font-size:12.5px; margin-top:2px; }
+  .anahtar { position:relative; width:48px; height:28px; flex:none; }
+  .anahtar input { opacity:0; width:0; height:0; }
+  .anahtar i { position:absolute; inset:0; background:var(--bg-3); border:1px solid var(--line); border-radius:28px; transition:.2s; }
+  .anahtar i::after { content:''; position:absolute; width:20px; height:20px; left:3px; top:3px; border-radius:50%; background:#8ea0b8; transition:.2s; }
+  .anahtar input:checked + i { background:var(--green-2); border-color:var(--green); }
+  .anahtar input:checked + i::after { transform:translateX(20px); background:#fff; }
+  .anahtar input:disabled + i { opacity:.4; }
+  .isaret { display:flex; align-items:center; gap:10px; font-size:13.5px; color:var(--dim); margin:2px 0 14px; }
+  .isaret input { width:18px; height:18px; accent-color:var(--green); }
+
+  /* ---- giris ekrani ---- */
+  #giris { display:flex; align-items:center; justify-content:center; padding:24px 18px; overflow-y:auto; }
+  .giris-kart { width:100%; max-width:400px; padding:30px 24px 22px; text-align:center; animation:kartGir .5s cubic-bezier(.2,.8,.25,1); }
+  @keyframes kartGir { from { opacity:0; transform:translateY(18px) scale(.97); } }
+  .giris-logo { width:92px; height:92px; border-radius:50%; margin-bottom:12px;
+    box-shadow:0 0 0 3px rgba(79,168,232,.25), 0 12px 34px rgba(47,127,208,.45); animation:yuz 5s ease-in-out infinite; }
+  @keyframes yuz { 50% { transform:translateY(-7px); } }
+  .giris-kart h1 { font-size:25px; font-weight:700; letter-spacing:-.4px; }
+  .giris-alt { font-size:12.5px; color:var(--blue); margin:3px 0 22px; }
+  .veya { display:flex; align-items:center; gap:10px; color:#5d6b80; font-size:12px; margin:14px 0; }
+  .veya::before, .veya::after { content:''; flex:1; height:1px; background:var(--line); }
+  .surum { color:#4a566a; font-size:11px; margin-top:16px; }
+
+  /* ---- uygulama ---- */
+  #uygulama { display:flex; flex-direction:column; }
+  .ust { display:flex; align-items:center; gap:10px; padding:12px 16px 10px; padding-top:max(12px, env(safe-area-inset-top));
+    background:rgba(11,15,22,.55); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.05); }
+  .ust img.logo { width:30px; height:30px; border-radius:50%; }
+  .ust .baslik { flex:1; font-weight:700; font-size:16px; letter-spacing:.2px; }
+  .hesap-cip { display:flex; align-items:center; gap:8px; color:var(--txt); font:inherit; background:var(--bg-3); border:1px solid var(--line);
+    border-radius:20px; padding:4px 12px 4px 4px; font-size:13.5px; font-weight:600; max-width:55%; }
+  .hesap-cip img { width:26px; height:26px; border-radius:6px; image-rendering:pixelated; }
+  .hesap-cip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .icerik { flex:1; overflow-y:auto; padding:16px 16px calc(var(--nav-h) + 20px); -webkit-overflow-scrolling:touch; }
+  .gorunum { animation:gir .28s ease; }
+  @keyframes gir { from { opacity:0; transform:translateY(8px); } }
+  h2.bolum { font-size:12px; color:var(--dim); letter-spacing:.6px; text-transform:uppercase; margin:18px 4px 10px; font-weight:600; }
+
+  /* alt menu */
+  nav.alt { position:fixed; left:0; right:0; bottom:0; z-index:10; height:calc(var(--nav-h) + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom); display:flex; background:rgba(11,15,22,.86);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-top:1px solid rgba(255,255,255,.06); }
+  nav.alt button { flex:1; border:0; background:none; color:var(--dim); font:inherit; font-size:11px; font-weight:600;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; position:relative; }
+  nav.alt button svg { width:22px; height:22px; }
+  nav.alt button.secili { color:var(--txt); }
+  nav.alt button.secili::before { content:''; position:absolute; top:0; left:30%; right:30%; height:3px; border-radius:0 0 3px 3px;
+    background:linear-gradient(90deg,var(--blue),var(--green)); }
+
+  /* oyna */
+  .hero { position:relative; overflow:hidden; padding:20px; }
+  .hero::before { content:''; position:absolute; inset:-40% -20% auto auto; width:260px; height:260px; border-radius:50%;
+    background:radial-gradient(circle, rgba(79,168,232,.35), transparent 65%); }
+  .hero-ust { position:relative; display:flex; align-items:center; gap:14px; }
+  .hero-ust img { width:64px; height:64px; border-radius:50%; box-shadow:0 8px 24px rgba(47,127,208,.4); }
+  .hero-ust h1 { font-size:22px; letter-spacing:-.3px; }
+  .hero-ust .ip { font-size:12.5px; color:var(--blue); margin-top:2px; }
+  .durum-hap { display:inline-flex; align-items:center; gap:7px; margin-top:16px; padding:7px 12px; border-radius:20px;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); font-size:13px; font-weight:600; position:relative; }
+  .durum-hap i { width:8px; height:8px; border-radius:50%; background:#6b778c; }
+  .durum-hap.acik i { background:var(--green); box-shadow:0 0 0 0 rgba(92,194,63,.6); animation:nabiz 2s infinite; }
+  .durum-hap.kapali i { background:var(--danger); }
+  @keyframes nabiz { 70% { box-shadow:0 0 0 8px rgba(92,194,63,0); } 100% { box-shadow:0 0 0 0 rgba(92,194,63,0); } }
+  .oyuncu { display:flex; gap:16px; align-items:flex-end; margin-top:16px; position:relative; }
+  .oyuncu img { width:88px; height:auto; image-rendering:pixelated; filter:drop-shadow(0 10px 16px rgba(0,0,0,.5)); }
+  .ciplar { display:flex; flex-wrap:wrap; gap:6px; padding-bottom:6px; }
+  .cip { font-size:11.5px; padding:5px 9px; border-radius:8px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.07); color:var(--dim); }
+  .cip.yesil { color:#9be07f; border-color:rgba(92,194,63,.3); background:rgba(92,194,63,.08); }
+
+  .oyna-kutu { margin-top:16px; padding:16px; }
+  .oyna-btn { font-size:20px; letter-spacing:1px; padding:18px; border-radius:14px; }
+  .ilerleme { margin-top:12px; }
+  .ilerleme .cubuk { height:8px; border-radius:8px; background:var(--bg-3); overflow:hidden; }
+  .ilerleme .cubuk i { display:block; height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,var(--blue),var(--green)); transition:width .3s; }
+  .ilerleme .cubuk.belirsiz i { width:35%; animation:kay 1.2s ease-in-out infinite; }
+  @keyframes kay { 0% { transform:translateX(-100%); } 100% { transform:translateX(300%); } }
+  .ilerleme p { font-size:12.5px; color:var(--dim); margin-top:7px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ipucu { margin-top:10px; font-size:12px; color:#5d6b80; text-align:center; }
+
+  /* magaza */
+  .sekmeler { display:flex; gap:6px; background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:12px; }
+  .sekmeler button { flex:1; border:0; background:none; color:var(--dim); font:inherit; font-weight:600; font-size:13.5px; padding:9px; border-radius:9px; }
+  .sekmeler button.secili { background:var(--bg-3); color:var(--txt); }
+  .mod { display:flex; gap:12px; align-items:center; padding:12px; margin-bottom:8px; }
+  .mod img { width:44px; height:44px; border-radius:10px; background:var(--bg-3); flex:none; object-fit:cover; }
+  .mod .m-bilgi { flex:1; min-width:0; }
+  .mod .m-bilgi b { display:block; font-size:14.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .mod .m-bilgi span { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; color:var(--dim); font-size:12px; margin-top:2px; }
+  .etiket { display:inline-block; font-size:10.5px; padding:2px 7px; border-radius:6px; margin-left:6px; vertical-align:middle; font-weight:600; }
+  .etiket.fps { background:rgba(92,194,63,.12); color:#9be07f; }
+  .etiket.sunucu { background:rgba(79,168,232,.12); color:#8cc8f2; }
+  .etiket.kontrol { background:rgba(255,185,0,.12); color:#ffd166; }
+  .bos { text-align:center; color:var(--dim); padding:34px 10px; font-size:14px; }
+
+  /* skin */
+  .skin-kart { padding:18px; text-align:center; }
+  .skin-kart img.govde { height:200px; image-rendering:pixelated; filter:drop-shadow(0 12px 20px rgba(0,0,0,.5)); margin:6px 0 14px; }
+  .secim { display:flex; gap:8px; margin:6px 0 14px; }
+  .secim label { flex:1; padding:12px 8px; border-radius:12px; border:1px solid var(--line); background:var(--bg-2); font-size:13.5px; font-weight:600; color:var(--dim); }
+  .secim input { display:none; }
+  .secim input:checked + label { border-color:var(--blue); color:var(--txt); background:rgba(79,168,232,.1); }
+
+  /* ayarlar */
+  .grup { padding:4px 16px; }
+  .liste-btn { display:flex; align-items:center; gap:12px; width:100%; border:0; background:none; color:var(--txt); font:inherit;
+    font-size:15px; padding:15px 0; border-bottom:1px solid rgba(255,255,255,.05); text-align:left; }
+  .liste-btn:last-child { border-bottom:0; }
+  .liste-btn svg { width:20px; height:20px; color:var(--dim); flex:none; }
+  .liste-btn span { flex:1; }
+  .liste-btn small { color:var(--dim); font-size:12px; }
+  input[type=range] { width:100%; accent-color:var(--green); margin-top:8px; }
+
+  /* alt pencere (hesaplar) */
+  .ortu { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:30; animation:sol .2s; }
+  @keyframes sol { from { opacity:0; } }
+  .alt-pencere { position:fixed; left:0; right:0; bottom:0; z-index:31; padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+    border-radius:20px 20px 0 0; animation:yukari .25s cubic-bezier(.2,.8,.25,1); max-height:80%; overflow-y:auto; }
+  @keyframes yukari { from { transform:translateY(100%); } }
+  .alt-pencere h3 { font-size:16px; margin-bottom:12px; }
+  .hesap-satir { display:flex; align-items:center; gap:12px; padding:10px; border-radius:12px; margin-bottom:6px; background:var(--bg-2); border:1px solid var(--line); }
+  .hesap-satir.secili { border-color:var(--green); background:rgba(92,194,63,.08); }
+  .hesap-satir img { width:36px; height:36px; border-radius:8px; image-rendering:pixelated; }
+  .hesap-satir .ad { flex:1; font-weight:600; }
+  .hesap-satir .ad small { display:block; color:var(--dim); font-weight:400; font-size:12px; }
+  .hesap-satir button { border:0; background:none; color:#ff8a8a; font:inherit; font-size:13px; padding:6px; }
+
+  /* bildirim */
+  #bildirim { position:fixed; left:16px; right:16px; bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); z-index:40;
+    padding:12px 14px; border-radius:12px; background:#1d2636; border:1px solid var(--line); font-size:14px;
+    box-shadow:0 12px 30px rgba(0,0,0,.5); transform:translateY(20px); opacity:0; transition:.25s; pointer-events:none; }
+  #bildirim.goster { transform:none; opacity:1; }
+  #bildirim.hata { border-color:rgba(239,68,68,.5); }
+  #bildirim.tamam { border-color:rgba(92,194,63,.5); }
+</style>
+</head>
+<body>
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<!-- ================= GIRIS ================= -->
+<section id="giris" class="ekran gizli">
+  <div class="kart giris-kart">
+    <img class="giris-logo" src="logo.png" alt="">
+    <h1>PengusCraft</h1>
+    <div class="giris-alt mono" id="girisIp">oyna.penguscraft.com</div>
+
+    <div class="alan">
+      <label for="gAd">Kullanıcı adı</label>
+      <input id="gAd" type="text" maxlength="16" autocomplete="username" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="alan">
+      <label for="gSifre">Sunucu şifresi <span class="ops">(isteğe bağlı)</span></label>
+      <input id="gSifre" type="password" autocomplete="current-password">
+    </div>
+    <div class="alan gizli" id="gSifre2Alan">
+      <label for="gSifre2">Şifre (tekrar)</label>
+      <input id="gSifre2" type="password" autocomplete="new-password">
+    </div>
+    <label class="isaret"><input type="checkbox" id="gKayit"> Sunucuya ilk kez giriyorum (kayıt ol)</label>
+    <div class="hata" id="gHata"></div>
+    <button class="btn yesil" id="gGiris">Giriş yap</button>
+    <div class="veya">veya</div>
+    <button class="btn koyu" id="gMicrosoft">
+      <svg width="18" height="18" viewBox="0 0 21 21"><path fill="#f25022" d="M1 1h9v9H1z"/><path fill="#7fba00" d="M11 1h9v9h-9z"/><path fill="#00a4ef" d="M1 11h9v9H1z"/><path fill="#ffb900" d="M11 11h9v9h-9z"/></svg>
+      Microsoft ile giriş
+    </button>
+    <button class="btn koyu gizli" id="gGeri" style="margin-top:9px">Vazgeç</button>
+    <div class="surum mono" id="gSurum"></div>
+  </div>
+</section>
+
+<!-- ================= UYGULAMA ================= -->
+<section id="uygulama" class="ekran gizli">
+  <header class="ust">
+    <img class="logo" src="logo.png" alt="">
+    <div class="baslik">Pengu Launcher</div>
+    <button class="hesap-cip" id="hesapCip"><img id="cipKafa" alt=""><span id="cipAd"></span></button>
+  </header>
+
+  <main class="icerik" id="icerik">
+    <!-- OYNA -->
+    <div class="gorunum" data-gorunum="oyna">
+      <div class="kart hero">
+        <div class="hero-ust">
+          <img src="logo.png" alt="">
+          <div><h1>PengusCraft</h1><div class="ip mono" id="heroIp"></div></div>
+        </div>
+        <div class="durum-hap" id="durumHap"><i></i><span id="durumMetin">Sunucu kontrol ediliyor…</span></div>
+        <div class="oyuncu">
+          <img id="govde" alt="">
+          <div class="ciplar">
+            <span class="cip">Minecraft 1.21</span>
+            <span class="cip">Fabric</span>
+            <span class="cip yesil" id="cipFps">FPS Boost açık</span>
+            <span class="cip" id="cipSes">Sesli sohbet</span>
+            <span class="cip" id="cipKontrol">Bedrock kontrol</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="kart oyna-kutu">
+        <button class="btn yesil oyna-btn" id="oynaBtn">OYNA</button>
+        <div class="ilerleme gizli" id="ilerleme">
+          <div class="cubuk belirsiz" id="cubuk"><i></i></div>
+          <p id="ilerlemeMetin">Hazırlanıyor…</p>
+        </div>
+        <div class="ipucu" id="oynaIpucu">Oyun açılınca doğrudan sunucuya bağlanırsın.</div>
+      </div>
+    </div>
+
+    <!-- MAGAZA -->
+    <div class="gorunum gizli" data-gorunum="magaza">
+      <div class="sekmeler">
+        <button class="secili" data-alt="ara">Mod Mağazası</button>
+        <button data-alt="modlarim">Modlarım</button>
+      </div>
+      <div id="altAra">
+        <input type="search" id="araKutu" placeholder="Modrinth'te mod ara…" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <div id="araSonuc" style="margin-top:12px"></div>
+      </div>
+      <div id="altModlarim" class="gizli">
+        <button class="btn koyu" id="modDosya" style="margin-bottom:12px">+ Dosyadan mod ekle (.jar)</button>
+        <div id="modListe"></div>
+      </div>
+    </div>
+
+    <!-- SKIN -->
+    <div class="gorunum gizli" data-gorunum="skin">
+      <div class="kart skin-kart">
+        <img class="govde" id="skinGovde" alt="">
+        <div class="sessiz" style="margin-bottom:8px">Skin modeli</div>
+        <div class="secim">
+          <input type="radio" name="model" id="mKlasik" checked><label for="mKlasik">Klasik (kalın kol)</label>
+          <input type="radio" name="model" id="mInce"><label for="mInce">İnce kol (Alex)</label>
+        </div>
+        <button class="btn" id="skinBtn">PNG seç ve yükle</button>
+        <div class="ipucu">64x64 PNG · en fazla 512 KB · sunucuya girince uygulanır</div>
+      </div>
+    </div>
+
+    <!-- AYARLAR -->
+    <div class="gorunum gizli" data-gorunum="ayarlar">
+      <h2 class="bolum">Performans</h2>
+      <div class="kart grup">
+        <div class="satir">
+          <div class="bilgi"><b>FPS Boost paketi</b><span>FerriteCore, ModernFix, Lithium, ImmediatelyFast, EntityCulling, Dynamic FPS</span></div>
+          <label class="anahtar"><input type="checkbox" id="aFps"><i></i></label>
+        </div>
+        <div class="satir">
+          <div class="bilgi"><b>Sodium</b><span>En yüksek FPS. Oyun açılışta çöküyorsa veya görüntü bozuksa kapat.</span></div>
+          <label class="anahtar"><input type="checkbox" id="aSodium"><i></i></label>
+        </div>
+        <div class="satir" style="display:block">
+          <div class="bilgi"><b>Bellek (RAM): <span class="mono" id="ramDeger" style="display:inline;color:var(--txt)"></span></b>
+            <span id="ramIpucu"></span></div>
+          <input type="range" id="aRam" step="256">
+        </div>
+      </div>
+
+      <h2 class="bolum">Kontroller</h2>
+      <div class="kart grup">
+        <div class="satir">
+          <div class="bilgi"><b>Bedrock tarzı dokunmatik</b><span>Minecraft PE gibi kontroller, ekranda gereksiz düğme yok. Kapatırsan klasik düğmeli düzen gelir.</span></div>
+          <label class="anahtar"><input type="checkbox" id="aBedrock"><i></i></label>
+        </div>
+      </div>
+
+      <h2 class="bolum">Sunucu şifresi</h2>
+      <div class="kart grup" style="padding:16px">
+        <div class="sessiz" id="sifreDurum" style="margin-bottom:12px"></div>
+        <div class="alan"><input id="aSifre" type="password" placeholder="Yeni şifre"></div>
+        <label class="isaret"><input type="checkbox" id="aKayit"> Sunucuda yeni hesap aç</label>
+        <div class="hata" id="aHata"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn kucuk" id="aSifreKaydet" style="flex:1">Kaydet</button>
+          <button class="btn kucuk kirmizi" id="aSifreSil">Sil</button>
+        </div>
+      </div>
+
+      <h2 class="bolum">Diğer</h2>
+      <div class="kart grup">
+        <button class="liste-btn" data-ac="kontroller"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M7 12h4M9 10v4M15 11h.01M18 13h.01"/></svg><span>Dokunmatik kontroller</span></button>
+        <button class="liste-btn" data-ac="gelismis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Gelişmiş ayarlar</span><small>renderer, Java</small></button>
+        <button class="liste-btn" data-ac="klasor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span>Oyun klasörü</span></button>
+        <button class="liste-btn" data-ac="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg><span>Hata kaydını paylaş</span></button>
+        <button class="liste-btn" data-ac="site"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>penguscraft.com.tr</span></button>
+      </div>
+      <div class="ipucu mono" id="aSurum" style="margin-top:16px"></div>
+    </div>
+  </main>
+
+  <nav class="alt">
+    <button data-sekme="oyna" class="secili"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Oyna</button>
+    <button data-sekme="arkadaslar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Arkadaşlar</button>
+    <button data-sekme="magaza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8l-9-5-9 5v8l9 5 9-5z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Modlar</button>
+    <button data-sekme="skin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="7" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/></svg>Skin</button>
+    <button data-sekme="ayarlar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ayarlar</button>
+  </nav>
+</section>
+
+<!-- hesaplar penceresi -->
+<div id="hesapOrtu" class="ortu gizli"></div>
+<div id="hesapPencere" class="kart alt-pencere gizli">
+  <h3>Hesaplar</h3>
+  <div id="hesapListe"></div>
+  <button class="btn koyu" id="hesapEkle" style="margin-top:8px">+ Hesap ekle</button>
+</div>
+
+<div id="bildirim"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const A = window.PenguApp;
+  const MR = 'https://api.modrinth.com/v2';
+  const MC = '1.21';
+  let D = {};                 // PenguApp.durum()
+  let sekme = 'oyna';
+  let hesapEklemeModu = false;
+  const aktifIlerleme = new Map();
+  let bekleyenler = {}, sayac = 0;
+
+  /* ---------- native koprusu ---------- */
+  function cagir(ad, ...arg) {
+    return new Promise((coz) => {
+      const id = 'c' + (++sayac);
+      bekleyenler[id] = coz;
+      A[ad](id, ...arg);
+    });
+  }
+  window.pengu = {
+    cevap(id, veri) { const c = bekleyenler[id]; delete bekleyenler[id]; if (c) c(veri); },
+    olay(ad, veri) {
+      if (ad === 'hesap' || ad === 'yenile') { yukle(); if (ad === 'yenile') sunucuYenile(); }
+      else if (ad === 'ilerleme') ilerleme(veri);
+      else if (ad === 'ilerlemeBitti') ilerlemeBitti(veri);
+      else if (ad === 'oynaHata') { bildir(veri.mesaj, 'hata'); oynaDurum(); }
+      else if (ad === 'skin') skinOlay(veri);
+      else if (ad === 'modEklendi') { if (veri.hata) bildir(veri.hata, 'hata'); else { bildir(veri.ad + ' eklendi.', 'tamam'); modlariCiz(); } }
+    }
+  };
+
+  let bildirimZaman;
+  function bildir(metin, tur) {
+    const b = $('bildirim');
+    b.textContent = metin; b.className = 'goster ' + (tur || '');
+    clearTimeout(bildirimZaman);
+    bildirimZaman = setTimeout(() => b.className = '', 3200);
+  }
+
+  const kafa = (ad, b) => 'https://mc-heads.net/avatar/' + encodeURIComponent(ad) + '/' + (b || 64);
+  const govde = (ad) => 'https://mc-heads.net/body/' + encodeURIComponent(ad) + '/200';
+
+  /* ---------- durum ---------- */
+  function yukle() {
+    try { D = JSON.parse(A.durum()); } catch { D = {}; }
+    const girisli = !!D.secili && !hesapEklemeModu;
+    $('giris').classList.toggle('gizli', girisli);
+    $('uygulama').classList.toggle('gizli', !girisli);
+    $('gGeri').classList.toggle('gizli', !(D.hesaplar && D.hesaplar.length));
+    $('gSurum').textContent = 'v' + (D.surum || '');
+    $('girisIp').textContent = D.sunucu || '';
+    if (!girisli) return;
+
+    $('cipAd').textContent = D.secili;
+    $('cipKafa').src = kafa(D.secili, 32);
+    $('heroIp').textContent = D.sunucu;
+    $('govde').src = govde(D.secili);
+    $('skinGovde').src = govde(D.secili) + '?t=' + Date.now();
+    $('cipFps').textContent = D.fps ? (D.sodium ? 'FPS Boost + Sodium' : 'FPS Boost açık') : 'FPS Boost kapalı';
+    $('cipFps').classList.toggle('yesil', !!D.fps);
+    $('cipKontrol').textContent = D.bedrock !== false ? 'Bedrock kontrol' : 'Klasik kontrol';
+
+    $('aFps').checked = !!D.fps;
+    $('aBedrock').checked = D.bedrock !== false;
+    $('aSodium').checked = !!D.sodium;
+    $('aSodium').disabled = !D.fps;
+    const ramMax = Math.max(1024, Math.min(8192, Math.floor((D.ramMax || 4096) * 0.6 / 256) * 256));
+    $('aRam').min = 512; $('aRam').max = ramMax;
+    $('aRam').value = Math.min(D.ram || 1536, ramMax);
+    ramGoster();
+    $('sifreDurum').textContent = D.authme
+      ? 'Şifren kayıtlı. Oyuna girince otomatik /login yapılır.'
+      : 'Şifre kayıtlı değil, oyunda /login yazman gerekir.';
+    $('aSurum').textContent = 'Pengu Launcher v' + D.surum + (D.microsoft ? ' · Microsoft hesabı' : ' · Offline hesap');
+    oynaDurum();
+  }
+
+  function sunucuYenile() {
+    const hap = $('durumHap');
+    cagir('sunucu').then((d) => {
+      hap.classList.toggle('acik', d.acik); hap.classList.toggle('kapali', !d.acik);
+      $('durumMetin').textContent = d.acik ? `Çevrimiçi · ${d.oyuncu} oyuncu` : 'Sunucuya ulaşılamıyor';
+    });
+  }
+
+  /* ---------- giris ---------- */
+  $('gKayit').onchange = () => $('gSifre2Alan').classList.toggle('gizli', !$('gKayit').checked);
+  $('gGiris').onclick = async () => {
+    const ad = $('gAd').value.trim(), sifre = $('gSifre').value, kayit = $('gKayit').checked;
+    if (kayit && sifre && sifre !== $('gSifre2').value) { $('gHata').textContent = 'Şifreler aynı değil.'; return; }
+    $('gHata').textContent = '';
+    const b = $('gGiris'); b.disabled = true; b.textContent = sifre && !kayit ? 'Şifre kontrol ediliyor…' : 'Giriş yapılıyor…';
+    const r = await cagir('girisOffline', ad, sifre, kayit);
+    b.disabled = false; b.textContent = 'Giriş yap';
+    if (r.hata) { $('gHata').textContent = r.hata; return; }
+    hesapEklemeModu = false;
+    $('gSifre').value = $('gSifre2').value = '';
+    setTimeout(() => { yukle(); sunucuYenile(); }, 300);
+  };
+  $('gMicrosoft').onclick = () => { hesapEklemeModu = false; A.girisMicrosoft(); };
+  $('gGeri').onclick = () => { hesapEklemeModu = false; yukle(); };
+
+  /* ---------- hesaplar ---------- */
+  function hesapPencere(ac) {
+    $('hesapOrtu').classList.toggle('gizli', !ac);
+    $('hesapPencere').classList.toggle('gizli', !ac);
+    if (!ac) return;
+    const k = $('hesapListe'); k.innerHTML = '';
+    for (const h of D.hesaplar || []) {
+      const d = document.createElement('div');
+      d.className = 'hesap-satir' + (h.ad === D.secili ? ' secili' : '');
+      d.innerHTML = `<img alt=""><div class="ad"></div><button>Çıkar</button>`;
+      d.querySelector('img').src = kafa(h.ad, 36);
+      d.querySelector('.ad').textContent = h.ad;
+      const s = document.createElement('small'); s.textContent = h.microsoft ? 'Microsoft' : 'Offline';
+      d.querySelector('.ad').appendChild(s);
+      d.onclick = () => { A.hesapSec(h.ad); hesapPencere(false); };
+      d.querySelector('button').onclick = (e) => { e.stopPropagation(); A.hesapSil(h.ad); setTimeout(() => { yukle(); hesapPencere(!!D.secili); }, 200); };
+      k.appendChild(d);
+    }
+  }
+  $('hesapCip').onclick = () => hesapPencere(true);
+  $('hesapOrtu').onclick = () => hesapPencere(false);
+  $('hesapEkle').onclick = () => { hesapPencere(false); hesapEklemeModu = true; $('gAd').value = ''; yukle(); };
+
+  /* ---------- sekmeler ---------- */
+  function sekmeAc(s) {
+    if (s === 'arkadaslar') { A.ac('arkadaslar'); return; }
+    sekme = s;
+    document.querySelectorAll('nav.alt button').forEach((b) => b.classList.toggle('secili', b.dataset.sekme === s));
+    document.querySelectorAll('.gorunum').forEach((g) => g.classList.toggle('gizli', g.dataset.gorunum !== s));
+    $('icerik').scrollTop = 0;
+    if (s === 'magaza') { modlariCiz(); if (!$('araSonuc').children.length) ara(''); }
+  }
+  document.querySelectorAll('nav.alt button').forEach((b) => b.onclick = () => sekmeAc(b.dataset.sekme));
+
+  /* ---------- oyna + ilerleme ---------- */
+  function oynaDurum() {
+    const calisiyor = aktifIlerleme.size > 0;
+    $('oynaBtn').disabled = calisiyor;
+    $('oynaBtn').textContent = calisiyor ? 'HAZIRLANIYOR…' : 'OYNA';
+    $('ilerleme').classList.toggle('gizli', !calisiyor);
+    $('oynaIpucu').classList.toggle('gizli', calisiyor);
+  }
+  function ilerleme(v) {
+    aktifIlerleme.set(v.kayit, v);
+    const son = v;
+    const c = $('cubuk');
+    c.classList.toggle('belirsiz', !(son.yuzde > 0));
+    c.querySelector('i').style.width = son.yuzde > 0 ? son.yuzde + '%' : '';
+    if (son.metin) $('ilerlemeMetin').textContent = son.metin;
+    oynaDurum();
+  }
+  function ilerlemeBitti(v) { aktifIlerleme.delete(v.kayit); oynaDurum(); }
+  $('oynaBtn').onclick = () => {
+    aktifIlerleme.set('_baslat', { yuzde: 0 });
+    $('ilerlemeMetin').textContent = 'Hazırlanıyor…';
+    oynaDurum();
+    A.oyna();
+    setTimeout(() => { aktifIlerleme.delete('_baslat'); oynaDurum(); }, 4000);
+  };
+
+  /* ---------- magaza ---------- */
+  document.querySelectorAll('.sekmeler button').forEach((b) => b.onclick = () => {
+    document.querySelectorAll('.sekmeler button').forEach((x) => x.classList.toggle('secili', x === b));
+    $('altAra').classList.toggle('gizli', b.dataset.alt !== 'ara');
+    $('altModlarim').classList.toggle('gizli', b.dataset.alt !== 'modlarim');
+    if (b.dataset.alt === 'modlarim') modlariCiz();
+  });
+
+  let araZaman;
+  $('araKutu').addEventListener('input', () => { clearTimeout(araZaman); araZaman = setTimeout(() => ara($('araKutu').value.trim()), 350); });
+
+  async function ara(metin) {
+    const k = $('araSonuc');
+    k.innerHTML = '<div class="bos">Yükleniyor…</div>';
+    const facets = JSON.stringify([['project_type:mod'], ['versions:' + MC], ['categories:fabric']]);
+    try {
+      const r = await fetch(`${MR}/search?query=${encodeURIComponent(metin)}&facets=${encodeURIComponent(facets)}&limit=20&index=${metin ? 'relevance' : 'downloads'}`);
+      const { hits } = await r.json();
+      k.innerHTML = '';
+      const kurulu = modAdlari();
+      for (const h of hits) {
+        const d = document.createElement('div');
+        d.className = 'kart mod';
+        d.innerHTML = `<img alt=""><div class="m-bilgi"><b></b><span></span></div><button class="btn kucuk"></button>`;
+        d.querySelector('img').src = h.icon_url || 'logo.png';
+        d.querySelector('b').textContent = h.title;
+        d.querySelector('span').textContent = h.description;
+        const b = d.querySelector('button');
+        const sade = (x) => x.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const var_ = kurulu.some((a) => sade(a).includes(sade(h.slug)));
+        b.textContent = var_ ? 'Kurulu' : 'Kur';
+        b.disabled = var_;
+        b.onclick = async () => {
+          b.disabled = true; b.textContent = '…';
+          const s = await cagir('modKur', h.project_id);
+          if (s.hata) { bildir(h.title + ' kurulamadı: ' + s.hata, 'hata'); b.disabled = false; b.textContent = 'Kur'; }
+          else { bildir(h.title + ' kuruldu.', 'tamam'); b.textContent = 'Kurulu'; }
+        };
+        k.appendChild(d);
+      }
+      if (!hits.length) k.innerHTML = '<div class="bos">Sonuç yok.</div>';
+    } catch {
+      k.innerHTML = '<div class="bos">Modrinth\'e ulaşılamıyor.</div>';
+    }
+  }
+
+  function modAdlari() {
+    try { return JSON.parse(A.modlar()).map((m) => m.dosya.toLowerCase()); } catch { return []; }
+  }
+
+  function modlariCiz() {
+    const k = $('modListe'); k.innerHTML = '';
+    let liste = [];
+    try { liste = JSON.parse(A.modlar()); } catch {}
+    for (const m of liste) {
+      const d = document.createElement('div');
+      d.className = 'kart mod';
+      const ad = m.dosya.replace(/\.disabled$/, '').replace(/\.jar$/, '');
+      d.innerHTML = `<div class="m-bilgi"><b></b><span></span></div><label class="anahtar"><input type="checkbox"><i></i></label>`;
+      d.querySelector('b').textContent = ad;
+      if (m.tur) {
+        const e = document.createElement('span'); e.className = 'etiket ' + m.tur;
+        e.textContent = { fps: 'FPS', kontrol: 'Kontrol', sunucu: 'Sunucu' }[m.tur] || m.tur;
+        d.querySelector('b').appendChild(e);
+      }
+      d.querySelector('.m-bilgi span').textContent = (m.boyut / 1048576).toFixed(1) + ' MB' + (m.tur ? ' · launcher yönetir' : '');
+      const cb = d.querySelector('input');
+      cb.checked = m.acik;
+      cb.disabled = m.dosya.toLowerCase().startsWith('penguscraft-');
+      cb.onchange = () => { A.modAc(m.dosya, cb.checked); setTimeout(modlariCiz, 150); };
+      if (!m.tur) {
+        const sil = document.createElement('button'); sil.className = 'btn kucuk kirmizi'; sil.textContent = 'Sil';
+        sil.onclick = () => { A.modSil(m.dosya); modlariCiz(); };
+        d.appendChild(sil);
+      }
+      k.appendChild(d);
+    }
+    if (!liste.length) k.innerHTML = '<div class="bos">Henüz mod yok. İlk OYNA\'da otomatik kurulacak.</div>';
+  }
+
+  /* ---------- skin ---------- */
+  $('skinBtn').onclick = () => A.skinSec($('mInce').checked);
+  function skinOlay(v) {
+    if (v.iptal) return;
+    if (v.hata) { bildir(v.hata, 'hata'); $('skinBtn').disabled = false; $('skinBtn').textContent = 'PNG seç ve yükle'; return; }
+    if (v.yukleniyor) { $('skinBtn').disabled = true; $('skinBtn').textContent = 'Yükleniyor…'; return; }
+    if (v.tamam) {
+      $('skinBtn').disabled = false; $('skinBtn').textContent = 'PNG seç ve yükle';
+      bildir('Skin yüklendi! Sunucuya girince uygulanacak.', 'tamam');
+    }
+  }
+
+  /* ---------- ayarlar ---------- */
+  $('modDosya').onclick = () => A.modDosyadan();
+  $('aBedrock').onchange = () => { A.ayar('bedrock', String($('aBedrock').checked)); yukle(); };
+  $('aFps').onchange = () => { A.ayar('fps', String($('aFps').checked)); yukle(); };
+  $('aSodium').onchange = () => { A.ayar('sodium', String($('aSodium').checked)); yukle(); };
+  function ramGoster() {
+    const v = +$('aRam').value;
+    $('ramDeger').textContent = (v / 1024).toFixed(v % 1024 ? 2 : 0) + ' GB';
+    $('ramIpucu').textContent = 'Cihazda ' + (D.ramMax / 1024).toFixed(1) + ' GB var. 1.5-2 GB çoğu telefon için ideal; fazlası takılmaya yol açabilir.';
+  }
+  $('aRam').oninput = ramGoster;
+  $('aRam').onchange = () => A.ayar('ram', $('aRam').value);
+
+  $('aSifreKaydet').onclick = async () => {
+    const s = $('aSifre').value;
+    if (!s) { $('aHata').textContent = 'Şifre yaz ya da "Sil"e bas.'; return; }
+    $('aHata').textContent = '';
+    const r = await cagir('sifreKaydet', s, $('aKayit').checked);
+    if (r.hata) { $('aHata').textContent = r.hata; return; }
+    $('aSifre').value = ''; bildir('Sunucu şifresi kaydedildi.', 'tamam'); yukle();
+  };
+  $('aSifreSil').onclick = async () => { await cagir('sifreKaydet', '', false); bildir('Şifre silindi.'); yukle(); };
+  document.querySelectorAll('[data-ac]').forEach((b) => b.onclick = () => A.ac(b.dataset.ac));
+
+  /* ---------- geri tusu ---------- */
+  window.geriTusu = () => {
+    if (!$('hesapPencere').classList.contains('gizli')) { hesapPencere(false); return true; }
+    if (hesapEklemeModu && D.secili) { hesapEklemeModu = false; yukle(); return true; }
+    if (!$('uygulama').classList.contains('gizli') && sekme !== 'oyna') { sekmeAc('oyna'); return true; }
+    return false;
+  };
+
+  yukle();
+  sunucuYenile();
+})();
+</script>
+</body>
+</html>
