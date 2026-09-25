@@ -252,6 +252,29 @@
    "isToggle": true,
    "isSwipeable": false,
    "passThruEnabled": false
+  },
+  {
+   "name": "Mikrofon",
+   "keycodes": [
+    77,
+    0,
+    0,
+    0
+   ],
+   "dynamicX": "${screen_width} - (px(76) / 100.0 * ${preferred_scale}) - (px(58) / 100.0 * ${preferred_scale}) - ${width} - ${margin} * 10",
+   "dynamicY": "${screen_height} - (px(76) / 100.0 * ${preferred_scale}) / 2 - ${height} / 2 - ${margin} * 4",
+   "width": 58,
+   "height": 58,
+   "bgColor": -1945432298,
+   "strokeColor": 1090519039,
+   "strokeWidth": 1.5,
+   "cornerRadius": 100,
+   "opacity": 1,
+   "displayInGame": true,
+   "displayInMenu": false,
+   "isToggle": false,
+   "isSwipeable": false,
+   "passThruEnabled": false
   }
  ],
  "mDrawerDataList": [],

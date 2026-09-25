@@ -105,6 +105,7 @@ public final class PenguHazirlik {
         kaynakPaketleri(ctx.getAssets(), new File(oyun, "resourcepacks"));
         optionsTxt(oyun, ayar);
         logoPaketi(oyun);
+        sesliSohbetAyari(oyun);
 
         ilerleme(95, "Sunucu");
         serversDat(oyun);
@@ -349,6 +350,36 @@ public final class PenguHazirlik {
         for (Map.Entry<String, String> e : satirlar.entrySet()) icerik = satirAyarla(icerik, e.getKey(), e.getValue());
         Tools.write(dosya.getAbsolutePath(), icerik);
         ayar.edit().putBoolean("options_uygulandi", true).apply();
+    }
+
+    /**
+     * Simple Voice Chat varsayilan olarak bas-konus (Caps Lock) modunda geliyor; telefonda o tus yok,
+     * mikrofon hic acilamiyordu. Her acilista sesle etkinlestirmeye aliyoruz ve ilk kurulum
+     * sihirbazini atliyoruz. Susturma oyundaki "Mikrofon" dugmesiyle (M) yapiliyor.
+     */
+    private static void sesliSohbetAyari(File oyun) {
+        File dosya = new File(oyun, "config/voicechat/voicechat-client.properties");
+        Map<String, String> zorunlu = new LinkedHashMap<>();
+        zorunlu.put("microphone_activation_type", "VOICE");
+        zorunlu.put("onboarding_finished", "true");
+        zorunlu.put("java_microphone_implementation", "false");
+        try {
+            List<String> satirlar = new ArrayList<>();
+            if (dosya.isFile()) {
+                for (String satir : Tools.read(dosya.getAbsolutePath()).split("\\r?\\n")) {
+                    int esit = satir.indexOf('=');
+                    String anahtar = esit > 0 ? satir.substring(0, esit).trim() : null;
+                    if (anahtar != null && zorunlu.containsKey(anahtar)) continue;
+                    if (!satir.isEmpty()) satirlar.add(satir);
+                }
+            }
+            for (Map.Entry<String, String> e : zorunlu.entrySet()) satirlar.add(e.getKey() + "=" + e.getValue());
+            //noinspection ResultOfMethodCallIgnored
+            dosya.getParentFile().mkdirs();
+            Tools.write(dosya.getAbsolutePath(), String.join("\n", satirlar) + "\n");
+        } catch (IOException e) {
+            Log.w(TAG, "Sesli sohbet ayari yazilamadi", e);
+        }
     }
 
     /** Rozet fontu kapaliysa isimlerin basinda kutu gorunur; her acilista listeye ekliyoruz. */

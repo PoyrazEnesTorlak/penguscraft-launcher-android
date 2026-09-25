@@ -81,7 +81,12 @@ public class MainMenuFragment extends Fragment {
             new ActivityResultContracts.GetContent(), this::modSecildi);
     /** Sesli sohbet (Simple Voice Chat) icin; cevap ne olursa olsun oyun baslar */
     private final ActivityResultLauncher<String> mMikrofonIzni = registerForActivityResult(
-            new ActivityResultContracts.RequestPermission(), verildi -> oynaDevam());
+            new ActivityResultContracts.RequestPermission(), verildi -> {
+                if (!verildi && getContext() != null)
+                    android.widget.Toast.makeText(getContext(), "Mikrofon izni yok: sesli sohbette konuşamazsın. "
+                            + "Ayarlar > Uygulamalar > Pengu Launcher > İzinler'den açabilirsin.", android.widget.Toast.LENGTH_LONG).show();
+                oynaDevam();
+            });
 
     public MainMenuFragment(){
         super(R.layout.fragment_launcher);
@@ -405,12 +410,10 @@ public class MainMenuFragment extends Fragment {
                     olay("oynaHata", json("mesaj", "Zaten hazırlanıyor, biraz bekle."));
                     return;
                 }
-                // Sesli sohbet icin mikrofon izni: bir kez sor, cevap ne olursa olsun devam et
-                SharedPreferences p = PenguAyarlar.prefs(ctx);
-                if (!p.getBoolean(PenguAyarlar.MIKROFON_SORULDU, false)
-                        && androidx.core.content.ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.RECORD_AUDIO)
+                // Sesli sohbet icin mikrofon izni: verilmediyse her OYNA'da sor (Android iki reddeden
+                // sonra kendisi sormayi birakir), cevap ne olursa olsun oyun baslar
+                if (androidx.core.content.ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.RECORD_AUDIO)
                         != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                    p.edit().putBoolean(PenguAyarlar.MIKROFON_SORULDU, true).apply();
                     mMikrofonIzni.launch(android.Manifest.permission.RECORD_AUDIO);
                     return;
                 }

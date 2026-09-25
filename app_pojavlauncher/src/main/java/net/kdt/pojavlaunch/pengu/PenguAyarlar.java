@@ -17,7 +17,6 @@ import java.nio.charset.StandardCharsets;
 
 /** Pengu'ya ozel ayarlar: mikrofon izni ve AuthMe (sunucu sifresi) bilgisi. */
 public final class PenguAyarlar {
-    public static final String MIKROFON_SORULDU = "mikrofon_soruldu";
     private static final String AUTHME_SIFRE = "authme_sifre";
     private static final String AUTHME_KAYIT = "authme_kayit_bekliyor";
 
