@@ -7,15 +7,19 @@
 #
 # Cikti: <mc-launcher>\dist\android\ icinde
 #   Pengu-Launcher-<surum>.apk  +  latest-android.json
-# Ikisini de sitede /indir/ klasorune yukle. Acik olan butun launcher'lar
-# bir sonraki acilista guncellemeyi gorup kendini gunceller.
+# APK otomatik olarak GitHub Releases'e yuklenir (gh CLI). Sen sadece
+# latest-android.json'u sitede /indir/ klasorune yuklersin; acik olan butun
+# launcher'lar bir sonraki acilista guncellemeyi gorup GitHub'dan indirir.
+# -GitHubsuz verirsen eskisi gibi APK'yi da siteye yuklemen gerekir.
 
 param(
     [string]$Surum = "",
     [string]$Notlar = "",
     [switch]$Istege,
     [string]$McLauncher = "$env:USERPROFILE\OneDrive\Masaüstü\Masaüstü\mc-launcher",
-    [string]$SiteAdresi = "https://penguscraft.com.tr/indir"
+    [string]$SiteAdresi = "https://penguscraft.com.tr/indir",
+    [string]$GitHubRepo = "PoyrazEnesTorlak/penguscraft-launcher-android",
+    [switch]$GitHubsuz
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,7 +47,7 @@ foreach ($cift in @(@("assets\mods", "mods", "*.jar"), @("assets\packs", "packs"
 $hazir = Join-Path $Assets "mods-hazir"
 New-Item -ItemType Directory -Force $hazir | Out-Null
 Get-ChildItem $hazir -Filter *.jar | Remove-Item -Force
-$modlar = @("P7dR8mSH", "9eGKb6K1", "U7KwGAnT", "AANobbMI", "uXXizFIs", "nmDcB62a", "gvQqBUqZ", "5ZwdcRci", "NNAgCjsB", "LQ3K71Q1")
+$modlar = @("P7dR8mSH", "9eGKb6K1")  # Fabric API, Simple Voice Chat
 $sorgu = "game_versions=" + [uri]::EscapeDataString('["1.21"]') + "&loaders=" + [uri]::EscapeDataString('["fabric"]')
 $ua = @{ "User-Agent" = "penguscraft-launcher-android/1.0 (oyna.penguscraft.com)" }
 foreach ($id in $modlar) {
@@ -91,10 +95,25 @@ $apk = Join-Path $cikti $apkAd
 Copy-Item (Join-Path $Kok "app_pojavlauncher\build\outputs\apk\release\app_pojavlauncher-release.apk") $apk -Force
 $sha = (Get-FileHash $apk -Algorithm SHA256).Hash.ToLower()
 
+# 4b) GitHub Release: APK oradan indirilir (hizli, site trafigi harcanmaz). Kaynak kodu da
+#     ayni repoda; LGPL geregi yayinlanan surumun kodu herkese acik olmali.
+$apkUrl = "$SiteAdresi/$apkAd"
+if (-not $GitHubsuz) {
+    $ErrorActionPreference = "Continue"
+    & git -C $Kok push origin HEAD:main
+    $baslik = "Pengu Launcher $Surum"
+    $aciklama = if ($Notlar) { $Notlar } else { $baslik }
+    & gh release create "v$Surum" $apk --repo $GitHubRepo --title $baslik --notes $aciklama
+    $ghKod = $LASTEXITCODE
+    $ErrorActionPreference = "Stop"
+    if ($ghKod -ne 0) { throw "GitHub'a yuklenemedi (gh auth status ile girisi kontrol et). Tekrar: gh release create v$Surum `"$apk`" --repo $GitHubRepo" }
+    $apkUrl = "https://github.com/$GitHubRepo/releases/download/v$Surum/$apkAd"
+}
+
 $bilgi = [ordered]@{
     versionCode = $kod
     versionName = $Surum
-    url         = "$SiteAdresi/$apkAd"
+    url         = $apkUrl
     sha256      = $sha
     zorunlu     = (-not $Istege.IsPresent)
     notlar      = $Notlar
@@ -104,6 +123,11 @@ $json = $bilgi | ConvertTo-Json
 [IO.File]::WriteAllText((Join-Path $cikti "latest-android.json"), $json, (New-Object Text.UTF8Encoding($false)))
 
 Write-Host ""
-Write-Host "Hazir! Su iki dosyayi sitede /indir/ klasorune yukle:"
-Write-Host "  $apk"
+if ($GitHubsuz) {
+    Write-Host "Hazir! Su iki dosyayi sitede /indir/ klasorune yukle:"
+    Write-Host "  $apk"
+} else {
+    Write-Host "Hazir! APK GitHub'a yuklendi: $apkUrl"
+    Write-Host "Sadece su dosyayi sitede /indir/ klasorune yukle:"
+}
 Write-Host "  $(Join-Path $cikti 'latest-android.json')"

@@ -298,10 +298,6 @@ public class MainMenuFragment extends Fragment {
                 o.put("secili", secili != null ? secili.username : JSONObject.NULL);
                 o.put("microsoft", secili != null && !secili.isLocal());
                 o.put("authme", PenguAyarlar.authmeVar(ctx));
-                SharedPreferences p = PenguAyarlar.prefs(ctx);
-                o.put("fps", p.getBoolean(PenguAyarlar.FPS_PAKETI, true));
-                o.put("sodium", p.getBoolean(PenguAyarlar.SODIUM, true));
-                o.put("bedrock", p.getBoolean(PenguAyarlar.BEDROCK_KONTROL, true));
                 o.put("ram", LauncherPreferences.DEFAULT_PREF.getInt("allocation", LauncherPreferences.PREF_RAM_ALLOCATION));
                 o.put("ramMax", Tools.getTotalDeviceMemory(ctx));
                 o.put("calisiyor", ProgressLayout.hasProcesses());
@@ -438,15 +434,6 @@ public class MainMenuFragment extends Fragment {
             Context ctx = getContext();
             if (ctx == null) return;
             switch (anahtar) {
-                case "fps":
-                    PenguAyarlar.prefs(ctx).edit().putBoolean(PenguAyarlar.FPS_PAKETI, Boolean.parseBoolean(deger)).apply();
-                    break;
-                case "sodium":
-                    PenguAyarlar.prefs(ctx).edit().putBoolean(PenguAyarlar.SODIUM, Boolean.parseBoolean(deger)).apply();
-                    break;
-                case "bedrock":
-                    PenguAyarlar.prefs(ctx).edit().putBoolean(PenguAyarlar.BEDROCK_KONTROL, Boolean.parseBoolean(deger)).apply();
-                    break;
                 case "ram":
                     int mb = Integer.parseInt(deger);
                     LauncherPreferences.DEFAULT_PREF.edit().putInt("allocation", mb).apply();

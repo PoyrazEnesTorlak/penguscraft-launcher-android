@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Oyun ici menu paneli: koyu Pengu arka plani, solda ince yesil cizgi -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape><solid android:color="#5CC23F"/></shape>
+    </item>
+    <item android:left="2dp">
+        <shape><solid android:color="#F20B0F16"/></shape>
+    </item>
+</layer-list>

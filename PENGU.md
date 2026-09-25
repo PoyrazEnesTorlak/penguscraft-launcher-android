@@ -18,13 +18,16 @@ Lisans LGPL-3.0: bu klasördeki değiştirilmiş kaynak kodunun herkese açık y
 
 Oyuncunun oyun klasörü: `Android/data/xyz.penguscraft.launcher/files/penguscraft/`
 
-## FPS Boost
+## Modlar ve kontroller
 
-Varsayılan olarak Sodium, FerriteCore, ModernFix, Lithium, ImmediatelyFast, EntityCulling ve Dynamic FPS
-kurulur. Renderer MobileGlues (OpenGL → GLES). İlk kurulumda options.txt telefona göre ayarlanır:
+Oyuncuya yalnızca **Fabric API** ve **Simple Voice Chat** (+ serverlock modu) kurulur. Eski sürümlerin
+kurduğu FPS paketi (Sodium vb.) ve TouchController `PenguConfig.KALDIRILAN_MODLAR` ile her OYNA'da silinir.
+Renderer MobileGlues (OpenGL → GLES). İlk kurulumda options.txt telefona göre ayarlanır:
 görüş mesafesi 6, hızlı grafik, az parçacık, gölge/bulut/yumuşak ışık kapalı, 60 FPS sınırı.
-Oyuncu ana ekrandaki **Performans** düğmesinden paketi veya yalnızca Sodium'u kapatabilir
-(bazı eski GPU'larda Sodium sorun çıkarabiliyor).
+
+Oyun içi dokunmatik düzen `assets/pengu/kontroller/pengu-dokunmatik.json`: solda yürüme joystick'i,
+sağda Zıpla/Eğil/Koş/Çanta/At/Sol el, üstte Sohbet/Klavye/Kamera ve Oyuncular/Duraklat.
+Üst ortadaki yeşil sekme Pengu oyun menüsünü açar (`activity_basemain.xml`, `PenguMenuAdapter`).
 
 ## Güncelleme yayınlama
 

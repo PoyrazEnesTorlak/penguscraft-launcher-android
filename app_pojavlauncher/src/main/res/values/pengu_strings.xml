@@ -46,4 +46,26 @@
     <string name="pengu_kontrol_ediliyor">Kontrol ediliyor…</string>
     <string name="pengu_kaydet">Kaydet</string>
     <string name="pengu_sil">Sil</string>
+
+    <!-- Oyun ici menu (ust ortadaki Pengu sekmesi) -->
+    <string name="pengu_menu_baslik">PengusCraft</string>
+    <string name="pengu_menu_alt">Oyun menüsü</string>
+    <string name="pengu_menu_duzenleyici">Tuş düzenleyici</string>
+    <string-array name="pengu_menu_oyun">
+        <item>Oyuna dön</item>
+        <item>Hızlı ayarlar</item>
+        <item>Tuşları düzenle</item>
+        <item>Klavye tuşu gönder</item>
+        <item>Kayıtlar</item>
+        <item>Oyunu kapat</item>
+    </string-array>
+    <string-array name="pengu_menu_editor">
+        <item>Düğme ekle</item>
+        <item>Düğme menüsü ekle</item>
+        <item>Joystick ekle</item>
+        <item>Düzen yükle</item>
+        <item>Düzeni kaydet</item>
+        <item>Varsayılan düzen</item>
+        <item>Düzenleyiciden çık</item>
+    </string-array>
 </resources>

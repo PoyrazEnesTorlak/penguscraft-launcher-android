@@ -70,9 +70,8 @@
 
 			<net.kdt.pojavlaunch.customcontrols.handleview.DrawerPullButton
 				android:id="@+id/drawer_button"
-				android:layout_width="40dp"
-				android:layout_height="20dp"
-				android:padding="8dp"
+				android:layout_width="64dp"
+				android:layout_height="26dp"
 				android:elevation="10dp"
 				android:layout_gravity="center_horizontal"/>
 			<net.kdt.pojavlaunch.customcontrols.mouse.HotbarView
@@ -91,13 +90,74 @@
 
 	</FrameLayout>
 
-	<ListView
-		android:layout_width="200dp"
+	<!-- Pengu oyun ici menusu: ust ortadaki sekmeyle sagdan acilir -->
+	<LinearLayout
+		android:id="@+id/pengu_menu_panel"
+		android:layout_width="250dp"
 		android:layout_height="match_parent"
 		android:layout_gravity="right"
-		android:background="?attr/colorBackgroundFloating"
+		android:background="@drawable/pengu_menu_arka"
+		android:clickable="true"
+		android:focusable="true"
 		android:fitsSystemWindows="false"
-		android:id="@+id/main_navigation_view"/>
+		android:orientation="vertical">
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			android:paddingHorizontal="18dp"
+			android:paddingTop="18dp"
+			android:paddingBottom="12dp">
+
+			<ImageView
+				android:layout_width="40dp"
+				android:layout_height="40dp"
+				android:importantForAccessibility="no"
+				android:src="@drawable/pengu_logo" />
+
+			<LinearLayout
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="12dp"
+				android:orientation="vertical">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/pengu_menu_baslik"
+					android:textColor="#E8EEF7"
+					android:textSize="18sp"
+					android:textStyle="bold" />
+
+				<TextView
+					android:id="@+id/pengu_menu_alt"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:text="@string/pengu_menu_alt"
+					android:textColor="#5CC23F"
+					android:textSize="12sp" />
+			</LinearLayout>
+		</LinearLayout>
+
+		<View
+			android:layout_width="match_parent"
+			android:layout_height="1dp"
+			android:layout_marginHorizontal="18dp"
+			android:layout_marginBottom="6dp"
+			android:background="#232D3D" />
+
+		<ListView
+			android:id="@+id/main_navigation_view"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			android:divider="@null"
+			android:dividerHeight="2dp"
+			android:listSelector="@android:color/transparent"
+			android:scrollbars="none" />
+	</LinearLayout>
 
 </androidx.drawerlayout.widget.DrawerLayout>
 

@@ -15,12 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-/** Pengu'ya ozel ayarlar: FPS paketi secimleri ve AuthMe (sunucu sifresi) bilgisi. */
+/** Pengu'ya ozel ayarlar: mikrofon izni ve AuthMe (sunucu sifresi) bilgisi. */
 public final class PenguAyarlar {
-    public static final String FPS_PAKETI = "fps_paketi";
-    public static final String SODIUM = "sodium";
-    /** Bedrock tarzi dokunmatik kontroller (TouchController modu + sade dugme katmani) */
-    public static final String BEDROCK_KONTROL = "bedrock_kontrol";
     public static final String MIKROFON_SORULDU = "mikrofon_soruldu";
     private static final String AUTHME_SIFRE = "authme_sifre";
     private static final String AUTHME_KAYIT = "authme_kayit_bekliyor";

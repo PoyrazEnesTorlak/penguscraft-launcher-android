@@ -256,9 +256,8 @@
           <div class="ciplar">
             <span class="cip">Minecraft 1.21</span>
             <span class="cip">Fabric</span>
-            <span class="cip yesil" id="cipFps">FPS Boost açık</span>
-            <span class="cip" id="cipSes">Sesli sohbet</span>
-            <span class="cip" id="cipKontrol">Bedrock kontrol</span>
+            <span class="cip yesil" id="cipSes">Sesli sohbet</span>
+            <span class="cip">Dokunmatik kontrol</span>
           </div>
         </div>
       </div>
@@ -307,26 +306,10 @@
     <div class="gorunum gizli" data-gorunum="ayarlar">
       <h2 class="bolum">Performans</h2>
       <div class="kart grup">
-        <div class="satir">
-          <div class="bilgi"><b>FPS Boost paketi</b><span>FerriteCore, ModernFix, Lithium, ImmediatelyFast, EntityCulling, Dynamic FPS</span></div>
-          <label class="anahtar"><input type="checkbox" id="aFps"><i></i></label>
-        </div>
-        <div class="satir">
-          <div class="bilgi"><b>Sodium</b><span>En yüksek FPS. Oyun açılışta çöküyorsa veya görüntü bozuksa kapat.</span></div>
-          <label class="anahtar"><input type="checkbox" id="aSodium"><i></i></label>
-        </div>
         <div class="satir" style="display:block">
           <div class="bilgi"><b>Bellek (RAM): <span class="mono" id="ramDeger" style="display:inline;color:var(--txt)"></span></b>
             <span id="ramIpucu"></span></div>
           <input type="range" id="aRam" step="256">
-        </div>
-      </div>
-
-      <h2 class="bolum">Kontroller</h2>
-      <div class="kart grup">
-        <div class="satir">
-          <div class="bilgi"><b>Bedrock tarzı dokunmatik</b><span>Minecraft PE gibi kontroller, ekranda gereksiz düğme yok. Kapatırsan klasik düğmeli düzen gelir.</span></div>
-          <label class="anahtar"><input type="checkbox" id="aBedrock"><i></i></label>
         </div>
       </div>
 
@@ -432,14 +415,6 @@
     $('heroIp').textContent = D.sunucu;
     $('govde').src = govde(D.secili);
     $('skinGovde').src = govde(D.secili) + '?t=' + Date.now();
-    $('cipFps').textContent = D.fps ? (D.sodium ? 'FPS Boost + Sodium' : 'FPS Boost açık') : 'FPS Boost kapalı';
-    $('cipFps').classList.toggle('yesil', !!D.fps);
-    $('cipKontrol').textContent = D.bedrock !== false ? 'Bedrock kontrol' : 'Klasik kontrol';
-
-    $('aFps').checked = !!D.fps;
-    $('aBedrock').checked = D.bedrock !== false;
-    $('aSodium').checked = !!D.sodium;
-    $('aSodium').disabled = !D.fps;
     const ramMax = Math.max(1024, Math.min(8192, Math.floor((D.ramMax || 4096) * 0.6 / 256) * 256));
     $('aRam').min = 512; $('aRam').max = ramMax;
     $('aRam').value = Math.min(D.ram || 1536, ramMax);
@@ -630,9 +605,6 @@
 
   /* ---------- ayarlar ---------- */
   $('modDosya').onclick = () => A.modDosyadan();
-  $('aBedrock').onchange = () => { A.ayar('bedrock', String($('aBedrock').checked)); yukle(); };
-  $('aFps').onchange = () => { A.ayar('fps', String($('aFps').checked)); yukle(); };
-  $('aSodium').onchange = () => { A.ayar('sodium', String($('aSodium').checked)); yukle(); };
   function ramGoster() {
     const v = +$('aRam').value;
     $('ramDeger').textContent = (v / 1024).toFixed(v % 1024 ? 2 : 0) + ' GB';

@@ -91,16 +91,15 @@ public final class PenguHazirlik {
         File mods = new File(oyun, "mods");
         if (!mods.isDirectory() && !mods.mkdirs()) throw new IOException("Oyun klasoru olusturulamadi: " + mods);
 
-        boolean bedrock = ayar.getBoolean(PenguAyarlar.BEDROCK_KONTROL, true);
-
         ilerleme(5, "Fabric");
         String surumId = fabricKur();
         kontrolDuzenleri(ctx.getAssets());
-        profilKur(ctx, surumId, bedrock);
+        profilKur(ctx, surumId);
 
         ilerleme(15, "Modlar");
         bizimModlar(ctx.getAssets(), mods);
-        modrinthModlari(ctx.getAssets(), mods, ayar);
+        kaldirilanModlar(mods);
+        modrinthModlari(ctx.getAssets(), mods);
 
         ilerleme(85, "Kaynak paketleri");
         kaynakPaketleri(ctx.getAssets(), new File(oyun, "resourcepacks"));
@@ -134,7 +133,7 @@ public final class PenguHazirlik {
         return surumId;
     }
 
-    private static void profilKur(Context ctx, String surumId, boolean bedrock) {
+    private static void profilKur(Context ctx, String surumId) {
         LauncherProfiles.load();
         MinecraftProfile profil = LauncherProfiles.mainProfileJson.profiles.get(PenguConfig.PROFIL_ANAHTAR);
         // Ayni oyun klasorunu kullanan baska kopyalari (eski surumlerden kalma) temizle
@@ -156,7 +155,7 @@ public final class PenguHazirlik {
         }
         profil.lastVersionId = surumId;
         profil.gameDir = "amethyst://" + PenguConfig.OYUN_KLASORU;
-        profil.controlFile = bedrock ? PenguConfig.KONTROL_BEDROCK : PenguConfig.KONTROL_KLASIK;
+        profil.controlFile = PenguConfig.KONTROL;
         LauncherProfiles.mainProfileJson.profiles.put(PenguConfig.PROFIL_ANAHTAR, profil);
         LauncherProfiles.write();
         LauncherPreferences.DEFAULT_PREF.edit()
@@ -190,22 +189,27 @@ public final class PenguHazirlik {
         File hedef = new File(Tools.CTRLMAP_PATH);
         //noinspection ResultOfMethodCallIgnored
         hedef.mkdirs();
-        for (String ad : new String[]{PenguConfig.KONTROL_BEDROCK, PenguConfig.KONTROL_KLASIK}) {
-            File f = new File(hedef, ad);
-            //noinspection ResultOfMethodCallIgnored
-            f.delete();
-            try {
-                assetKopyala(am, "pengu/kontroller/" + ad, f);
-            } catch (IOException e) {
-                Log.w(TAG, "Kontrol duzeni kopyalanamadi: " + ad, e);
-            }
+        // Eski surumlerin klasik duzeni artik kullanilmiyor
+        //noinspection ResultOfMethodCallIgnored
+        new File(hedef, "pengu-klasik.json").delete();
+        File f = new File(hedef, PenguConfig.KONTROL);
+        //noinspection ResultOfMethodCallIgnored
+        f.delete();
+        try {
+            assetKopyala(am, "pengu/kontroller/" + PenguConfig.KONTROL, f);
+        } catch (IOException e) {
+            Log.w(TAG, "Kontrol duzeni kopyalanamadi", e);
         }
     }
 
-    private static void modrinthModlari(AssetManager am, File mods, SharedPreferences ayar) {
-        boolean fpsAcik = ayar.getBoolean(PenguAyarlar.FPS_PAKETI, true);
-        boolean sodiumAcik = ayar.getBoolean(PenguAyarlar.SODIUM, true);
-        boolean bedrock = ayar.getBoolean(PenguAyarlar.BEDROCK_KONTROL, true);
+    /** Eski surumlerin kurdugu FPS paketi ve TouchController jar'larini siler. */
+    private static void kaldirilanModlar(File mods) {
+        for (String anahtar : PenguConfig.KALDIRILAN_MODLAR)
+            for (File f : modBul(mods, anahtar)) //noinspection ResultOfMethodCallIgnored
+                f.delete();
+    }
+
+    private static void modrinthModlari(AssetManager am, File mods) {
         String[] hazir;
         try { hazir = am.list("pengu/mods-hazir"); } catch (IOException e) { hazir = null; }
         if (hazir == null) hazir = new String[0];
@@ -213,20 +217,7 @@ public final class PenguHazirlik {
         PenguConfig.Mod[] liste = PenguConfig.MODLAR;
         for (int i = 0; i < liste.length; i++) {
             PenguConfig.Mod mod = liste[i];
-            boolean istenen;
-            switch (mod.tur) {
-                case "fps": istenen = fpsAcik && (sodiumAcik || !mod.anahtar.equals("sodium")); break;
-                case "kontrol": istenen = bedrock; break;
-                default: istenen = true;
-            }
             List<File> kurulu = modBul(mods, mod.anahtar);
-
-            if (!istenen) {
-                // FPS paketi kapatildiysa bizim kurdugumuz kopyalari kaldiriyoruz
-                for (File f : kurulu) //noinspection ResultOfMethodCallIgnored
-                    f.delete();
-                continue;
-            }
             if (!kurulu.isEmpty()) continue; // .disabled de sayilir: oyuncu bilerek kapatmis olabilir
 
             ilerleme(15 + (i * 70 / liste.length), mod.ad);

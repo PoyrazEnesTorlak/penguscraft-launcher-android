@@ -41,7 +41,7 @@ public final class PenguConfig {
      */
     public static final class Mod {
         public final String id, ad, anahtar;
-        /** "zorunlu", "fps" (FPS paketi) veya "kontrol" (Bedrock tarzi dokunmatik kontroller) */
+        /** Simdilik hep "zorunlu" */
         public final String tur;
         Mod(String id, String ad, String anahtar, String tur) {
             this.id = id; this.ad = ad; this.anahtar = anahtar; this.tur = tur;
@@ -52,21 +52,19 @@ public final class PenguConfig {
             // Zorunlu (PC ile ayni)
             new Mod("P7dR8mSH", "Fabric API", "fabric-api", "zorunlu"),
             new Mod("9eGKb6K1", "Simple Voice Chat", "voicechat", "zorunlu"),
-            // Bedrock (Minecraft PE) tarzi dokunmatik kontroller
-            new Mod("U7KwGAnT", "TouchController", "touchcontroller", "kontrol"),
-            // FPS paketi: telefonda en cok fark yaratanlar
-            new Mod("AANobbMI", "Sodium", "sodium", "fps"),
-            new Mod("uXXizFIs", "FerriteCore", "ferritecore", "fps"),
-            new Mod("nmDcB62a", "ModernFix", "modernfix", "fps"),
-            new Mod("gvQqBUqZ", "Lithium", "lithium", "fps"),
-            new Mod("5ZwdcRci", "ImmediatelyFast", "immediatelyfast", "fps"),
-            new Mod("NNAgCjsB", "EntityCulling", "entityculling", "fps"),
-            new Mod("LQ3K71Q1", "Dynamic FPS", "dynamic-fps", "fps"),
     };
 
-    /** Oyun ici dokunmatik duzenler (assets/pengu/kontroller) */
-    public static final String KONTROL_BEDROCK = "pengu-dokunmatik.json";
-    public static final String KONTROL_KLASIK = "pengu-klasik.json";
+    /**
+     * Eski surumlerin kurdugu (FPS paketi, TouchController) modlar. Telefonlarda sorun
+     * cikardiklari icin kaldirildi; her OYNA'da oyuncunun mods klasorunden silinir.
+     */
+    public static final String[] KALDIRILAN_MODLAR = {
+            "sodium", "ferritecore", "modernfix", "lithium", "immediatelyfast",
+            "entityculling", "dynamic-fps", "touchcontroller"
+    };
+
+    /** Oyun ici dokunmatik duzen (assets/pengu/kontroller): joystick + Pengu dugmeleri */
+    public static final String KONTROL = "pengu-dokunmatik.json";
 
     /** assets/pengu/packs altindaki, oyuncuya otomatik kurulan kaynak paketleri. */
     public static final String[] KAYNAK_PAKETLERI = {

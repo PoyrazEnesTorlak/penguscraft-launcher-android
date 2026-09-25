@@ -38,6 +38,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Keep;
@@ -67,6 +68,7 @@ import net.kdt.pojavlaunch.customcontrols.mouse.HotbarView;
 import net.kdt.pojavlaunch.customcontrols.mouse.Touchpad;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
+import net.kdt.pojavlaunch.pengu.PenguMenuAdapter;
 import net.kdt.pojavlaunch.prefs.QuickSettingSideDialog;
 import net.kdt.pojavlaunch.services.GameService;
 import net.kdt.pojavlaunch.utils.JREUtils;
@@ -100,6 +102,8 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     private LoggerView loggerView;
     private DrawerLayout drawerLayout;
     private ListView navDrawer;
+    private View mPenguMenuPanel;
+    private TextView mPenguMenuAlt;
     private View mDrawerPullButton;
     private GyroControl mGyroControl = null;
     private ControlLayout mControlLayout;
@@ -156,8 +160,10 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
             getWindow().setSustainedPerformanceMode(PREF_SUSTAINED_PERFORMANCE);
 
-        ingameControlsEditorArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.menu_customcontrol));
+        ingameControlsEditorArrayAdapter = new PenguMenuAdapter(this,
+                getResources().getStringArray(R.array.pengu_menu_editor),
+                new int[]{R.drawable.ic_add, R.drawable.ic_add, R.drawable.ic_add, R.drawable.ic_folder,
+                        R.drawable.ic_pengu_kayit, R.drawable.ic_menu_custom_controls, R.drawable.ic_arrow_back_white}, -1);
         ingameControlsEditorListener = (parent, view, position, id) -> {
             switch(position) {
                 case 0: mControlLayout.addControlButton(new ControlData("New")); break;
@@ -259,15 +265,19 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
 
             // Menu
-            gameActionArrayAdapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.menu_ingame));
+            // Pengu menusu; sira R.array.pengu_menu_oyun ile ayni
+            gameActionArrayAdapter = new PenguMenuAdapter(this,
+                    getResources().getStringArray(R.array.pengu_menu_oyun),
+                    new int[]{R.drawable.ic_pengu_oyna, R.drawable.ic_sharp_settings_24, R.drawable.ic_pengu_tuslar,
+                            R.drawable.ic_pengu_klavye, R.drawable.ic_pengu_kayit, R.drawable.ic_pengu_kapat}, 5);
             gameActionClickListener = (parent, view, position, id) -> {
                 switch(position) {
-                    case 0: dialogForceClose(MainActivity.this); break;
-                    case 1: openLogOutput(); break;
-                    case 2: dialogSendCustomKey(); break;
-                    case 3: openQuickSettings(); break;
-                    case 4: openCustomControls(); break;
+                    case 0: break; // Oyuna don: sadece menuyu kapat
+                    case 1: openQuickSettings(); break;
+                    case 2: openCustomControls(); break;
+                    case 3: dialogSendCustomKey(); break;
+                    case 4: openLogOutput(); break;
+                    case 5: dialogForceClose(MainActivity.this); break;
                 }
                 drawerLayout.closeDrawers();
             };
@@ -334,6 +344,8 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         touchpad = findViewById(R.id.main_touchpad);
         drawerLayout = findViewById(R.id.main_drawer_options);
         navDrawer = findViewById(R.id.main_navigation_view);
+        mPenguMenuPanel = findViewById(R.id.pengu_menu_panel);
+        mPenguMenuAlt = findViewById(R.id.pengu_menu_alt);
         loggerView = findViewById(R.id.mainLoggerView);
         mControlLayout = findViewById(R.id.main_control_layout);
         touchCharInput = findViewById(R.id.mainTouchCharInput);
@@ -518,6 +530,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         mControlLayout.setModifiable(true);
         navDrawer.setAdapter(ingameControlsEditorArrayAdapter);
         navDrawer.setOnItemClickListener(ingameControlsEditorListener);
+        mPenguMenuAlt.setText(R.string.pengu_menu_duzenleyici);
         mDrawerPullButton.setVisibility(View.VISIBLE);
         isInEditor = true;
     }
@@ -650,7 +663,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     @Override
     public void onClickedMenu() {
-        drawerLayout.openDrawer(navDrawer);
+        drawerLayout.openDrawer(mPenguMenuPanel);
         navDrawer.requestLayout();
     }
 
@@ -671,6 +684,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
         navDrawer.setAdapter(gameActionArrayAdapter);
         navDrawer.setOnItemClickListener(gameActionClickListener);
+        mPenguMenuAlt.setText(R.string.pengu_menu_alt);
         isInEditor = false;
     }
 
